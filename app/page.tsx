@@ -122,18 +122,19 @@ export default function Home() {
                   </h3>
 
                   <div className="p-2.5 bg-[#FAF7F2] rounded-xl border border-stone-200 text-xs space-y-1">
-                    <div className="font-semibold text-stone-800">
-                      AI-Assisted Fair-Price Baseline:
+                    <div className="font-semibold text-stone-800 flex items-center justify-between">
+                      <span>Market Price Analysis:</span>
+                      <span className="text-[10px] text-emerald-800 bg-emerald-100 font-bold px-1.5 py-0.5 rounded border border-emerald-300">HIGH Evidence</span>
                     </div>
                     <div className="text-stone-600">
-                      Material Cost ₹850 + Labour (22 hrs @ ₹140/hr = ₹3,080). Suggested range ₹3,500 – ₹4,500.
+                      Based on 8 comparable market listings (Amazon, Flipkart, ONDC). Market median: ₹3,775.
                     </div>
                   </div>
 
                   <div className="pt-2 border-t border-stone-100 flex items-center justify-between text-xs">
                     <div>
-                      <span className="text-stone-500 block text-[11px]">Fair Price Range:</span>
-                      <span className="text-base font-bold text-stone-900">₹3,500 – ₹4,500</span>
+                      <span className="text-stone-500 block text-[11px]">Recommended Market Range:</span>
+                      <span className="text-base font-bold text-stone-900">₹3,600 – ₹4,100</span>
                     </div>
                     <Link
                       href="/heritage/prod-dokra-01"
@@ -335,15 +336,15 @@ export default function Home() {
                 <TrendingUp className="w-7 h-7" />
               </div>
               <h4 className="text-xl font-bold text-stone-900 font-serif">
-                Income: Fair-Price Baseline
+                Income: Market Price Discovery
               </h4>
               <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
-                Defensible, configurable fair-price algorithm accounting for raw materials, crafting labor hours, and regional craft complexity benchmarks.
+                Market-driven price discovery analyzing genuinely comparable listings across approved platforms (Amazon, Flipkart, ONDC) with full artisan authority.
               </p>
               <ul className="text-xs text-stone-700 space-y-2 pt-2 border-t border-stone-100">
                 <li className="flex items-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Configurable regional hourly benchmarks</span>
+                  <span>Transparent comparable product evidence</span>
                 </li>
                 <li className="flex items-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />

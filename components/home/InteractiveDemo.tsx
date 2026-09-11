@@ -16,6 +16,7 @@ import {
   ArrowRight,
   RotateCcw,
   Volume2,
+  TrendingUp,
 } from "lucide-react";
 import { ProvenanceBadge } from "@/components/ui/Badge";
 
@@ -32,7 +33,7 @@ const CHECKLIST = [
   "✓ Spoken Hindi audio transcribed",
   "✓ Language & regional Bastar dialect identified",
   "✓ Cire-Perdue (lost-wax) technique extracted",
-  "✓ AI-assisted fair-price baseline calculated",
+  "✓ Market-based price discovery analysis completed",
   "✓ Digital Heritage Profile prepared for review",
 ];
 
@@ -293,18 +294,50 @@ export const InteractiveDemo: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="p-2.5 bg-amber-50/70 rounded-lg border border-amber-200 space-y-1">
-                  <div className="flex justify-between">
-                    <span className="text-stone-600">Material Cost:</span>
-                    <span className="font-bold text-stone-900">₹850</span>
+                {/* Market Price Analysis Summary (Market-Based Discovery) */}
+                <div className="p-3 bg-stone-50 rounded-xl border border-stone-200 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-stone-900 text-[11px] uppercase tracking-wider flex items-center gap-1">
+                      <TrendingUp className="w-3.5 h-3.5 text-[#C2410C]" />
+                      Market Price Analysis
+                    </span>
+                    <span className="text-[10px] bg-emerald-100 text-emerald-900 font-bold px-2 py-0.5 rounded-full">
+                      Evidence: HIGH
+                    </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-stone-600">Estimated Labour (22 hrs @ ₹140/hr):</span>
-                    <span className="font-bold text-stone-900">₹3,080</span>
+
+                  <div className="space-y-1 text-[11px]">
+                    <div className="flex justify-between text-stone-600">
+                      <span>Amazon (Dhokra Figurine):</span>
+                      <span className="font-mono font-bold text-stone-800">₹3,799</span>
+                    </div>
+                    <div className="flex justify-between text-stone-600">
+                      <span>Flipkart (Tribal Bull):</span>
+                      <span className="font-mono font-bold text-stone-800">₹3,499</span>
+                    </div>
+                    <div className="flex justify-between text-stone-600">
+                      <span>ONDC (Kondagaon Guild):</span>
+                      <span className="font-mono font-bold text-stone-800">₹4,100</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between pt-1 border-t border-amber-200 font-bold">
-                    <span className="text-stone-900">Suggested Fair Price Range:</span>
-                    <span className="text-[#C2410C]">₹3,500 – ₹4,500</span>
+
+                  <div className="pt-2 border-t border-stone-200 space-y-1">
+                    <div className="flex justify-between text-stone-700 text-[11px]">
+                      <span>Market Median:</span>
+                      <span className="font-bold text-stone-900 font-mono">₹3,775</span>
+                    </div>
+                    <div className="flex justify-between font-bold text-xs">
+                      <span className="text-stone-900">Recommended Range:</span>
+                      <span className="text-[#C2410C] font-mono">₹3,600 – ₹4,100</span>
+                    </div>
+                    <div className="flex justify-between pt-1 border-t border-stone-200 font-black text-xs text-emerald-900 bg-emerald-50/80 p-1.5 rounded-lg">
+                      <span>Artisan Final Price:</span>
+                      <span className="font-mono">₹3,900</span>
+                    </div>
+                  </div>
+
+                  <div className="text-[10px] text-stone-500 italic pt-0.5">
+                    Demo Market Data • Final price chosen by the artisan
                   </div>
                 </div>
               </div>

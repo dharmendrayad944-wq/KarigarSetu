@@ -28,7 +28,7 @@ export const Footer: React.FC = () => {
             </p>
             <div className="flex items-center gap-2 text-xs text-amber-400 font-medium">
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span>National Living Heritage Vault & Fair-Price Baseline Engine</span>
+              <span>National Living Heritage Vault & Market Price Discovery Engine</span>
             </div>
           </div>
 

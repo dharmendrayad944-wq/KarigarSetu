@@ -7,7 +7,9 @@ import Link from "next/link";
 import confetti from "canvas-confetti";
 import { useLanguage } from "@/components/providers/LanguageContext";
 import { ProductRepository } from "@/lib/db/repository";
-import { Product, HeritageClaim, PricingBreakdown, AIUnderstanding, Dimensions, CraftComplexity } from "@/lib/db/schema";
+import { Product, HeritageClaim, PricingBreakdown, AIUnderstanding, Dimensions, CraftComplexity, PriceAnalysis, CostReference, ArtisanPriceDecision } from "@/lib/db/schema";
+import { MarketPriceAnalysisCard } from "@/components/pricing/MarketPriceAnalysisCard";
+import { marketPriceDiscoveryService } from "@/lib/pricing/discovery-service";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import {
@@ -71,7 +73,13 @@ export default function ReviewProductPage({
   const [pricingBreakdown, setPricingBreakdown] = useState<PricingBreakdown | undefined>(undefined);
   const [aiUnderstanding, setAiUnderstanding] = useState<AIUnderstanding | undefined>(undefined);
 
-  // Configurable Pricing Baseline Inputs
+  // Market Price Discovery & Artisan Sovereign Decision State
+  const [finalPrice, setFinalPrice] = useState<number>(3900);
+  const [priceDecisionMode, setPriceDecisionMode] = useState<"recommendation_accepted" | "artisan_manual">("recommendation_accepted");
+  const [priceAnalysis, setPriceAnalysis] = useState<PriceAnalysis | undefined>(undefined);
+  const [costReference, setCostReference] = useState<CostReference | undefined>(undefined);
+
+  // Optional Artisan Cost Parameters (Reference only)
   const [materialCostInput, setMaterialCostInput] = useState<number>(850);
   const [laborHoursInput, setLaborHoursInput] = useState<number>(22);
   const [hourlyBenchmarkInput, setHourlyBenchmarkInput] = useState<number>(140);
@@ -105,6 +113,24 @@ export default function ReviewProductPage({
         setHourlyBenchmarkInput(loaded.pricing_breakdown.hourly_benchmark ?? (loaded.pricing_breakdown as any).hourly_living_wage ?? 140);
         setCraftComplexityInput(loaded.pricing_breakdown.craft_complexity || "High");
       }
+      if (loaded.cost_reference) {
+        setCostReference(loaded.cost_reference);
+      }
+      if (loaded.price_analysis) {
+        setPriceAnalysis(loaded.price_analysis);
+      } else {
+        // Fallback discovery if missing
+        marketPriceDiscoveryService.discoverMarketPrice({
+          product_type: loaded.title,
+          craft: loaded.craft_name,
+          category: loaded.category,
+          material: (loaded.materials || []).join(" / "),
+          region: `${loaded.district}, ${loaded.state}`,
+        }).then((res) => {
+          setPriceAnalysis(res.priceAnalysis);
+        });
+      }
+      setFinalPrice(loaded.final_price || loaded.artisan_price_decision?.final_price || Math.round((loaded.suggested_min_price + loaded.suggested_max_price) / 2));
       setAiUnderstanding(loaded.ai_understanding);
     }
     setLoading(false);
@@ -164,6 +190,11 @@ export default function ReviewProductPage({
     );
   };
 
+  const handleFinalPriceChange = (newPrice: number, mode: "recommendation_accepted" | "artisan_manual") => {
+    setFinalPrice(newPrice);
+    setPriceDecisionMode(mode);
+  };
+
   // Save Draft (Artisan Edited)
   const handleSaveDraft = () => {
     if (!product) return;
@@ -180,8 +211,19 @@ export default function ReviewProductPage({
       dimensions,
       suggested_min_price: minPrice,
       suggested_max_price: maxPrice,
+      final_price: finalPrice,
+      price_analysis: priceAnalysis,
+      artisan_price_decision: {
+        product_id: product.id,
+        recommended_min: minPrice,
+        recommended_max: maxPrice,
+        final_price: finalPrice,
+        chosen_by: priceDecisionMode,
+        pricing_sources: priceAnalysis?.comparables.map((c) => c.marketplace) || ["Amazon", "Flipkart", "ONDC"],
+      },
       artisan_story: artisanStory,
       pricing_breakdown: pricingBreakdown,
+      cost_reference: costReference,
       ai_understanding: aiUnderstanding,
       heritage_record: product.heritage_record
         ? {
@@ -209,8 +251,7 @@ export default function ReviewProductPage({
     setProduct(updated);
     setTimeout(() => {
       setSaving(false);
-      alert("Draft saved in artisan workspace with status [Artisan Edited]!");
-    }, 400);
+    }, 600);
   };
 
   // Approve & Save to Catalogue
@@ -230,9 +271,19 @@ export default function ReviewProductPage({
       dimensions,
       suggested_min_price: minPrice,
       suggested_max_price: maxPrice,
-      final_price: Math.round((minPrice + maxPrice) / 2),
+      final_price: finalPrice,
+      price_analysis: priceAnalysis,
+      artisan_price_decision: {
+        product_id: product.id,
+        recommended_min: minPrice,
+        recommended_max: maxPrice,
+        final_price: finalPrice,
+        chosen_by: priceDecisionMode,
+        pricing_sources: priceAnalysis?.comparables.map((c) => c.marketplace) || ["Amazon", "Flipkart", "ONDC"],
+      },
       artisan_story: artisanStory,
       pricing_breakdown: pricingBreakdown,
+      cost_reference: costReference,
       ai_understanding: aiUnderstanding,
       heritage_record: product.heritage_record
         ? {
@@ -461,7 +512,7 @@ export default function ReviewProductPage({
 
         {/* Two-Column Workspace Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Left Column: Product Photo & Configurable Fair-Price Baseline (Lg: 5 cols) */}
+          {/* Left Column: Product Photo & Market Price Analysis (Lg: 5 cols) */}
           <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-24">
             <Card padded={false} className="overflow-hidden border border-[#E7E0D3]">
               <div className="relative h-80 sm:h-96 w-full bg-stone-100">
@@ -505,149 +556,15 @@ export default function ReviewProductPage({
               </div>
             </Card>
 
-            {/* Configurable AI-Assisted Fair Price Baseline Card */}
-            <Card className="bg-white border-2 border-amber-200 space-y-4">
-              <div className="flex items-center justify-between border-b border-amber-100 pb-2">
-                <div className="flex items-center gap-2">
-                  <IndianRupee className="w-5 h-5 text-[#C2410C]" />
-                  <div>
-                    <h3 className="text-sm font-bold text-stone-900 font-serif">
-                      AI-Assisted Fair-Price Baseline
-                    </h3>
-                    <p className="text-[11px] text-stone-500">
-                      Configurable inputs based on regional artisan living wage benchmarks
-                    </p>
-                  </div>
-                </div>
-                <ProvenanceBadge label="AI Suggested" size="sm" />
-              </div>
-
-              {/* Configurable Interactive Inputs */}
-              <div className="bg-[#FAF7F2] p-3.5 rounded-xl border border-stone-200 space-y-3 text-xs">
-                <div className="flex items-center justify-between text-stone-700 font-bold uppercase text-[11px]">
-                  <span className="flex items-center gap-1">
-                    <Sliders className="w-3.5 h-3.5 text-[#C2410C]" /> Configurable Cost Parameters
-                  </span>
-                  <span className="text-stone-400 font-normal">Live Dynamic Math</span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2.5">
-                  <div>
-                    <label className="text-[11px] text-stone-500 block mb-0.5">Material Cost (₹):</label>
-                    <input
-                      type="number"
-                      value={materialCostInput}
-                      onChange={(e) => {
-                        const val = Number(e.target.value);
-                        setMaterialCostInput(val);
-                        handleRecalculatePricing(val, laborHoursInput, hourlyBenchmarkInput, craftComplexityInput);
-                      }}
-                      className="w-full px-2.5 py-1.5 rounded-lg border border-stone-300 font-semibold bg-white text-stone-900"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-[11px] text-stone-500 block mb-0.5">Estimated Labour (Hrs):</label>
-                    <input
-                      type="number"
-                      value={laborHoursInput}
-                      onChange={(e) => {
-                        const val = Number(e.target.value);
-                        setLaborHoursInput(val);
-                        handleRecalculatePricing(materialCostInput, val, hourlyBenchmarkInput, craftComplexityInput);
-                      }}
-                      className="w-full px-2.5 py-1.5 rounded-lg border border-stone-300 font-semibold bg-white text-stone-900"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-[11px] text-stone-500 block mb-0.5">Hourly Benchmark (₹/hr):</label>
-                    <input
-                      type="number"
-                      value={hourlyBenchmarkInput}
-                      onChange={(e) => {
-                        const val = Number(e.target.value);
-                        setHourlyBenchmarkInput(val);
-                        handleRecalculatePricing(materialCostInput, laborHoursInput, val, craftComplexityInput);
-                      }}
-                      className="w-full px-2.5 py-1.5 rounded-lg border border-stone-300 font-semibold bg-white text-stone-900"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-[11px] text-stone-500 block mb-0.5">Craft Complexity:</label>
-                    <select
-                      value={craftComplexityInput}
-                      onChange={(e) => {
-                        const val = e.target.value as CraftComplexity;
-                        setCraftComplexityInput(val);
-                        handleRecalculatePricing(materialCostInput, laborHoursInput, hourlyBenchmarkInput, val);
-                      }}
-                      className="w-full px-2.5 py-1.5 rounded-lg border border-stone-300 font-semibold bg-white text-stone-900"
-                    >
-                      <option value="Low">Low</option>
-                      <option value="Medium">Medium</option>
-                      <option value="High">High</option>
-                      <option value="Master">Master</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              {/* Price Calculation Output Box */}
-              <div className="space-y-2 text-xs">
-                <div className="p-3 bg-emerald-50/70 rounded-xl border border-emerald-200 space-y-1.5">
-                  <div className="flex justify-between items-center text-emerald-950 font-medium">
-                    <span>Estimated Labour Subtotal:</span>
-                    <span className="font-bold text-emerald-800 text-sm">
-                      ₹{(laborHoursInput * hourlyBenchmarkInput).toLocaleString("en-IN")}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center text-stone-900 font-bold pt-1 border-t border-emerald-200">
-                    <span>Suggested Fair Price Range:</span>
-                    <span className="text-[#C2410C] text-sm">
-                      ₹{minPrice.toLocaleString("en-IN")} – ₹{maxPrice.toLocaleString("en-IN")}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="p-2.5 bg-stone-50 rounded-lg border border-stone-200 text-[11px] text-stone-600 leading-relaxed space-y-1">
-                  <div>
-                    <strong>Pricing Policy:</strong> Benchmark is configurable by craft and region. Final price is always decided by the artisan.
-                  </div>
-                  <div className="text-stone-500 italic">
-                    Note: Distinguishes estimated baseline price from actual sales revenue in the catalogue.
-                  </div>
-                </div>
-              </div>
-
-              {/* Price Range Slider / Inputs */}
-              <div className="pt-2 border-t border-stone-100 space-y-2">
-                <span className="text-xs font-bold uppercase text-stone-700 block">
-                  Artisan Approved Price Range (INR ₹):
-                </span>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <span className="text-[11px] text-stone-500 block">Min Price (₹)</span>
-                    <input
-                      type="number"
-                      value={minPrice}
-                      onChange={(e) => setMinPrice(Number(e.target.value))}
-                      className="w-full px-3 py-2 rounded-xl border border-stone-300 font-bold text-sm text-stone-900"
-                    />
-                  </div>
-                  <div>
-                    <span className="text-[11px] text-stone-500 block">Max Price (₹)</span>
-                    <input
-                      type="number"
-                      value={maxPrice}
-                      onChange={(e) => setMaxPrice(Number(e.target.value))}
-                      className="w-full px-3 py-2 rounded-xl border border-stone-300 font-bold text-sm text-stone-900"
-                    />
-                  </div>
-                </div>
-              </div>
-            </Card>
+            {/* Market-Based Price Analysis Card (Section 20 & 8) */}
+            <MarketPriceAnalysisCard
+              priceAnalysis={priceAnalysis}
+              finalPrice={finalPrice}
+              onFinalPriceChange={handleFinalPriceChange}
+              costReference={costReference}
+              craftName={craftName}
+              isDemoMode={Boolean(product?.is_demo_data)}
+            />
           </div>
 
           {/* Right Column: Editable Commercial Listing & Digital Heritage Profile (Lg: 7 cols) */}

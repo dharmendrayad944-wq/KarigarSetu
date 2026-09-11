@@ -65,7 +65,7 @@ export default function CataloguePage() {
             Heritage Market Listings
           </h1>
           <p className="text-stone-600 text-sm sm:text-base">
-            Handcrafted creations with verified living heritage profiles, transparent fair-price baselines, and direct artisan attribution.
+            Handcrafted creations with verified living heritage profiles, transparent market price analysis, and direct artisan attribution.
           </p>
         </div>
 

@@ -161,3 +161,92 @@ create policy "Anyone can read claims for published products" on public.heritage
 -- Artisan CRUD on own records
 create policy "Artisans manage their own products" on public.products for all
   using (auth.uid() is not null);
+
+-- ==============================================================================
+-- 10. MARKET-BASED PRICE DISCOVERY SYSTEM
+-- ==============================================================================
+
+-- 10A. Market Price Observations (External marketplace snapshots)
+create table if not exists public.market_price_observations (
+  id uuid primary key default uuid_generate_v4(),
+  marketplace text not null, -- 'Amazon', 'Flipkart', 'ONDC', 'Tribes India', etc.
+  external_product_id text,
+  title text not null,
+  url text,
+  price numeric(10, 2) not null check (price > 0),
+  currency text default 'INR',
+  availability text default 'available' check (availability in ('available', 'limited_stock', 'out_of_stock')),
+  source_type text default 'demo_data' check (source_type in ('official_api', 'approved_partner', 'ondc_network', 'demo_data')),
+  craft text,
+  material text,
+  technique text,
+  retrieved_at timestamptz default now(),
+  created_at timestamptz default now()
+);
+
+-- 10B. Product Comparables (M-to-N matching & comparability scoring)
+create table if not exists public.product_comparables (
+  id uuid primary key default uuid_generate_v4(),
+  product_id uuid references public.products(id) on delete cascade,
+  market_price_observation_id uuid references public.market_price_observations(id) on delete cascade,
+  title text not null,
+  marketplace text not null,
+  price numeric(10, 2) not null,
+  currency text default 'INR',
+  url text,
+  similarity_score numeric(4, 3) not null check (similarity_score >= 0 and similarity_score <= 1),
+  craft_similarity numeric(4, 3),
+  category_similarity numeric(4, 3),
+  material_similarity numeric(4, 3),
+  technique_similarity numeric(4, 3),
+  size_similarity numeric(4, 3),
+  handmade_status boolean default true,
+  match_reasons text[] default '{}',
+  retrieved_at timestamptz default now(),
+  source_type text default 'demo_data',
+  created_at timestamptz default now()
+);
+
+-- 10C. Price Analyses (Statistical market reference & recommendation)
+create table if not exists public.price_analyses (
+  id uuid primary key default uuid_generate_v4(),
+  product_id uuid references public.products(id) on delete cascade,
+  comparable_count integer not null default 0,
+  min_price numeric(10, 2) not null,
+  median_price numeric(10, 2) not null,
+  max_price numeric(10, 2) not null,
+  recommended_min numeric(10, 2) not null,
+  recommended_max numeric(10, 2) not null,
+  confidence text not null default 'high' check (confidence in ('high', 'medium', 'low')),
+  evidence_strength text not null default 'HIGH' check (evidence_strength in ('HIGH', 'MEDIUM', 'LOW')),
+  approved_sources_count integer default 3,
+  checked_at timestamptz default now(),
+  explanation text not null,
+  is_demo_data boolean default true,
+  status text default 'sufficient_data' check (status in ('sufficient_data', 'limited_data', 'insufficient_data')),
+  created_at timestamptz default now()
+);
+
+-- 10D. Artisan Price Decisions (Final sovereign decision tracking)
+create table if not exists public.artisan_price_decisions (
+  id uuid primary key default uuid_generate_v4(),
+  product_id uuid references public.products(id) on delete cascade,
+  recommended_min numeric(10, 2) not null,
+  recommended_max numeric(10, 2) not null,
+  final_price numeric(10, 2) not null check (final_price > 0),
+  chosen_by text not null default 'recommendation_accepted' check (chosen_by in ('artisan_manual', 'recommendation_accepted')),
+  pricing_sources text[] default '{}',
+  notes text,
+  created_at timestamptz default now()
+);
+
+-- Enable RLS on new tables
+alter table public.market_price_observations enable row level security;
+alter table public.product_comparables enable row level security;
+alter table public.price_analyses enable row level security;
+alter table public.artisan_price_decisions enable row level security;
+
+-- Public read for published products' market analyses
+create policy "Anyone can read price analyses" on public.price_analyses for select using (true);
+create policy "Anyone can read product comparables" on public.product_comparables for select using (true);
+create policy "Anyone can read market observations" on public.market_price_observations for select using (true);

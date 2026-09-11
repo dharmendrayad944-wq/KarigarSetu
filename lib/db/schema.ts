@@ -51,19 +51,144 @@ export const AIUnderstandingSchema = z.object({
 export type AIUnderstanding = z.infer<typeof AIUnderstandingSchema>;
 
 // ==============================================================================
-// 3. PRICING SYSTEM: Configurable AI-Assisted Fair Price Baseline
+// 3. PRODUCT COMPARISON ATTRIBUTES (Multimodal AI Extraction)
 // ==============================================================================
+export const ComparisonAttributesSchema = z.object({
+  product_type: z.string(),
+  craft: z.string(),
+  category: z.string(),
+  material: z.string(),
+  technique: z.string().optional(),
+  region: z.string().optional(),
+  dimensions: z.string().nullable().optional(),
+  quantity_or_set: z.string().nullable().optional(),
+  handmade: z.boolean().default(true).optional(),
+  design_or_motif: z.string().nullable().optional(),
+});
+
+export type ComparisonAttributes = z.infer<typeof ComparisonAttributesSchema>;
+
+// ==============================================================================
+// 3B. MARKET PRICE OBSERVATION (Raw external marketplace data)
+// ==============================================================================
+export const MarketPriceObservationSchema = z.object({
+  id: z.string(),
+  marketplace: z.string(), // "Amazon" | "Flipkart" | "ONDC" | "Other Approved" | "Tribes India"
+  external_product_id: z.string().optional(),
+  title: z.string(),
+  url: z.string().optional(),
+  price: z.number().positive(),
+  currency: z.string().default("INR"),
+  availability: z.enum(["available", "limited_stock", "out_of_stock"]).default("available"),
+  source_type: z.enum(["official_api", "approved_partner", "ondc_network", "demo_data"]).default("demo_data"),
+  retrieved_at: z.string(),
+  is_demo: z.boolean().default(false),
+  craft: z.string().optional(),
+  material: z.string().optional(),
+  technique: z.string().optional(),
+});
+
+export type MarketPriceObservation = z.infer<typeof MarketPriceObservationSchema>;
+
+// ==============================================================================
+// 3C. PRODUCT COMPARABLE (Filtered & scored comparable product)
+// ==============================================================================
+export const ProductComparableSchema = z.object({
+  id: z.string(),
+  product_id: z.string().optional(),
+  market_price_observation_id: z.string().optional(),
+  title: z.string(),
+  marketplace: z.string(),
+  price: z.number().positive(),
+  currency: z.string().default("INR"),
+  url: z.string().optional(),
+  similarity_score: z.number().min(0).max(1), // e.g. 0.91 (91%)
+  craft_similarity: z.number().min(0).max(1).optional(),
+  category_similarity: z.number().min(0).max(1).optional(),
+  material_similarity: z.number().min(0).max(1).optional(),
+  technique_similarity: z.number().min(0).max(1).optional(),
+  size_similarity: z.number().min(0).max(1).optional(),
+  handmade_status: z.boolean().default(true),
+  match_reasons: z.array(z.string()).default([]),
+  retrieved_at: z.string(),
+  source_type: z.string().default("demo_data"),
+  is_demo: z.boolean().default(false),
+});
+
+export type ProductComparable = z.infer<typeof ProductComparableSchema>;
+
+// ==============================================================================
+// 3D. PRICE ANALYSIS (Statistical market reference & recommendation)
+// ==============================================================================
+export const PriceAnalysisSchema = z.object({
+  id: z.string(),
+  product_id: z.string().optional(),
+  comparable_count: z.number().int().nonnegative(),
+  min_price: z.number().positive(),
+  median_price: z.number().positive(),
+  max_price: z.number().positive(),
+  recommended_min: z.number().positive(),
+  recommended_max: z.number().positive(),
+  confidence: z.enum(["high", "medium", "low"]).default("high"),
+  evidence_strength: z.enum(["HIGH", "MEDIUM", "LOW"]).default("HIGH"),
+  approved_sources_count: z.number().int().default(3),
+  generated_at: z.string(),
+  checked_at: z.string(),
+  explanation: z.string(),
+  is_demo_data: z.boolean().default(true),
+  status: z.enum(["sufficient_data", "limited_data", "insufficient_data"]).default("sufficient_data"),
+  comparables: z.array(ProductComparableSchema).default([]),
+});
+
+export type PriceAnalysis = z.infer<typeof PriceAnalysisSchema>;
+
+// ==============================================================================
+// 3E. ARTISAN PRICE DECISION (Final sovereign authority)
+// ==============================================================================
+export const ArtisanPriceDecisionSchema = z.object({
+  id: z.string().optional(),
+  product_id: z.string(),
+  recommended_min: z.number().positive(),
+  recommended_max: z.number().positive(),
+  final_price: z.number().positive(),
+  chosen_by: z.enum(["artisan_manual", "recommendation_accepted"]).default("recommendation_accepted"),
+  created_at: z.string().default(() => new Date().toISOString()).optional(),
+  pricing_sources: z.array(z.string()).default([]),
+  notes: z.string().optional(),
+});
+
+export type ArtisanPriceDecision = z.infer<typeof ArtisanPriceDecisionSchema>;
+
+// ==============================================================================
+// 3F. OPTIONAL ARTISAN COST REFERENCE (Purely optional baseline, not market price)
+// ==============================================================================
+export const CostReferenceSchema = z.object({
+  material_cost: z.number().nonnegative(),
+  labor_hours: z.number().positive(),
+  craft_complexity: z.enum(["Low", "Medium", "High", "Master"]).default("Medium"),
+  hourly_benchmark: z.number().positive(),
+  estimated_cost_subtotal: z.number().positive(),
+  reference_min: z.number().positive(),
+  reference_max: z.number().positive(),
+  benchmark_source: z.string().default("Regional Craft Guild Reference"),
+  rationale: z.string().min(5),
+  is_optional_reference: z.boolean().default(true),
+});
+
+export type CostReference = z.infer<typeof CostReferenceSchema>;
+
+// Backwards-compatibility alias
 export const PricingBreakdownSchema = z.object({
   material_cost: z.number().nonnegative(),
   labor_hours: z.number().positive(),
   craft_complexity: z.enum(["Low", "Medium", "High", "Master"]).default("Medium"),
-  hourly_benchmark: z.number().positive(), // Configurable by craft and region
+  hourly_benchmark: z.number().positive(),
   fair_wage_subtotal: z.number().positive(),
   suggested_min_price: z.number().positive(),
   suggested_max_price: z.number().positive(),
-  ondc_export_markup_suggestion: z.number().positive(),
+  ondc_export_markup_suggestion: z.number().positive().optional(),
   benchmark_source: z.string().default("Regional Craft Guild Standard"),
-  rationale: z.string().min(10),
+  rationale: z.string().min(5),
 });
 
 export type PricingBreakdown = z.infer<typeof PricingBreakdownSchema>;
@@ -160,11 +285,15 @@ export const ProductSchema = z.object({
   dimensions: DimensionsSchema.optional(),
   inventory: z.number().int().nonnegative().default(1),
   
-  // Pricing
+  // Pricing & Market Discovery
   suggested_min_price: z.number().positive("Minimum price must be greater than zero"),
   suggested_max_price: z.number().positive("Maximum price must be greater than zero"),
   final_price: z.number().positive().nullable().optional(),
-  pricing_breakdown: PricingBreakdownSchema.optional(),
+  price_analysis: PriceAnalysisSchema.optional(),
+  artisan_price_decision: ArtisanPriceDecisionSchema.optional(),
+  comparison_attributes: ComparisonAttributesSchema.optional(),
+  cost_reference: CostReferenceSchema.optional(),
+  pricing_breakdown: PricingBreakdownSchema.optional(), // Backwards compatibility
   
   // Status lifecycle
   status: z.enum([
@@ -218,7 +347,7 @@ export const GenerateListingInputSchema = z.object({
   }).optional(),
   selected_category: z.string().optional(),
   language: z.enum(["hi", "en"]).default("hi"),
-  hourly_benchmark: z.number().positive().optional(), // Configurable artisan wage baseline
+  hourly_benchmark: z.number().positive().optional(), // Optional artisan wage baseline
 }).refine(
   (data) => !!data.voice_transcript || !!data.text_description,
   {
@@ -244,7 +373,11 @@ export const GenerateListingOutputSchema = z.object({
   dimensions: DimensionsSchema.optional(),
   suggested_price_min: z.number().positive(),
   suggested_price_max: z.number().positive(),
-  pricing_breakdown: PricingBreakdownSchema,
+  price_analysis: PriceAnalysisSchema.optional(),
+  artisan_price_decision: ArtisanPriceDecisionSchema.optional(),
+  comparison_attributes: ComparisonAttributesSchema.optional(),
+  cost_reference: CostReferenceSchema.optional(),
+  pricing_breakdown: PricingBreakdownSchema.optional(),
   ai_understanding: AIUnderstandingSchema,
   traditional_technique: z.string(),
   cultural_significance: z.string(),

@@ -7,6 +7,9 @@ import {
   HeritageClaim,
   CraftComplexity,
   GenerateListingOutputSchema,
+  ComparisonAttributes,
+  PriceAnalysis,
+  CostReference,
 } from "@/lib/db/schema";
 import { MockListingAIService } from "./mock-ai";
 
@@ -162,6 +165,12 @@ IMPORTANT: NEVER invent fake government GI registration numbers. If referencing 
     };
   }
 
+  async discoverMarketPrice(attributes: ComparisonAttributes): Promise<PriceAnalysis> {
+    const { marketPriceDiscoveryService } = await import("@/lib/pricing/discovery-service");
+    const result = await marketPriceDiscoveryService.discoverMarketPrice(attributes);
+    return result.priceAnalysis;
+  }
+
   async generatePriceEstimate(params: {
     material_cost?: number;
     labor_hours?: number;
@@ -169,7 +178,7 @@ IMPORTANT: NEVER invent fake government GI registration numbers. If referencing 
     hourly_benchmark?: number;
     craft?: string;
     region?: string;
-  }): Promise<PricingBreakdown> {
+  }): Promise<CostReference> {
     const materialCost = params.material_cost || 500;
     const laborHours = params.labor_hours || 10;
     const complexity = params.complexity || "Medium";
@@ -183,12 +192,12 @@ IMPORTANT: NEVER invent fake government GI registration numbers. If referencing 
       labor_hours: laborHours,
       craft_complexity: complexity,
       hourly_benchmark: benchmark,
-      fair_wage_subtotal: wageSubtotal,
-      suggested_min_price: minPrice,
-      suggested_max_price: maxPrice,
-      ondc_export_markup_suggestion: Math.round(maxPrice * 1.2),
-      benchmark_source: `${params.region || "Regional"} Craft Guild Fair Wage Benchmark`,
-      rationale: `Material Cost ₹${materialCost} + Labour (${laborHours} hrs @ ₹${benchmark}/hr benchmark = ₹${wageSubtotal}). Suggested range ₹${minPrice.toLocaleString()} – ₹${maxPrice.toLocaleString()}. Final price is decided by the artisan.`,
+      estimated_cost_subtotal: wageSubtotal,
+      reference_min: minPrice,
+      reference_max: maxPrice,
+      benchmark_source: `${params.region || "Regional"} Craft Guild Reference`,
+      rationale: `Optional cost reference: Material ₹${materialCost} + Labour (${laborHours} hrs @ ₹${benchmark}/hr benchmark = ₹${wageSubtotal}). This is an internal cost reference only, not a market price.`,
+      is_optional_reference: true,
     };
   }
 }

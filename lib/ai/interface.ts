@@ -5,6 +5,9 @@ import {
   PricingBreakdown,
   HeritageClaim,
   CraftComplexity,
+  ComparisonAttributes,
+  PriceAnalysis,
+  CostReference,
 } from "@/lib/db/schema";
 
 export interface AIProvider {
@@ -18,14 +21,15 @@ export interface AIProvider {
     cultural_story: string;
     claims: HeritageClaim[];
   }>;
-  generatePriceEstimate(params: {
+  discoverMarketPrice?(attributes: ComparisonAttributes): Promise<PriceAnalysis>;
+  generatePriceEstimate?(params: {
     material_cost?: number;
     labor_hours?: number;
     complexity?: CraftComplexity;
     hourly_benchmark?: number;
     craft?: string;
     region?: string;
-  }): Promise<PricingBreakdown>;
+  }): Promise<PricingBreakdown | CostReference>;
 }
 
 // Backwards-compatibility alias

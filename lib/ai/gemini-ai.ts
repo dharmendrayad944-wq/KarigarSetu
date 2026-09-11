@@ -1,5 +1,10 @@
 import { IListingAIService } from "./interface";
-import { GenerateListingInput, GenerateListingOutput, GenerateListingOutputSchema } from "@/lib/db/schema";
+import {
+  GenerateListingInput,
+  GenerateListingOutput,
+  ComparisonAttributes,
+} from "@/lib/db/schema";
+import { marketPriceDiscoveryService } from "@/lib/pricing/discovery-service";
 
 export class GeminiListingAIService implements IListingAIService {
   private apiKey: string;
@@ -11,12 +16,12 @@ export class GeminiListingAIService implements IListingAIService {
   async generateListing(input: GenerateListingInput): Promise<GenerateListingOutput> {
     const prompt = `
 You are an expert Indian Handicrafts and Cultural Heritage specialist assisting an artisan for the platform "KarigarSetu" (SIH26090).
-Your mission is to take an artisan's product photograph and their spoken description (or text), and generate an AI-assisted market-ready listing plus a Digital Heritage Profile with transparent pricing and strict provenance.
+Your mission is to take an artisan's product photograph and their spoken description (or text), and extract structured product morphology, craft attributes, and a Digital Heritage Profile.
 
 CRITICAL AI SAFETY & ACCURACY RULES:
-1. NEVER automatically claim official GI (Geographical Indication) certification. If a craft matches a GI candidate cluster, set "gi_candidacy_status" to "candidate_unverified", and mark the claim as "requires_verification".
-2. NEVER assert unverified cultural history as absolute truth. Label all AI-inferred cultural hypotheses as "requires_verification".
-3. Provide transparent AI pricing breakdown: raw materials cost, artisan crafting hours, hourly living wage in INR, and explicit rationale.
+1. NEVER invent or fabricate external marketplace prices, competitor listings, or fake URLs. External market evidence is retrieved separately via compliant provider APIs.
+2. NEVER automatically claim official GI (Geographical Indication) certification. If a craft matches a GI candidate cluster, set "gi_candidacy_status" to "candidate_unverified", and mark the claim as "requires_verification".
+3. NEVER assert unverified cultural history as absolute truth. Label all AI-inferred cultural hypotheses as "requires_verification".
 4. Separate artisan-provided facts from AI-inferred facts. Set verification_status to "requires_verification" or "unverified" for any AI inference!
 
 ARTISAN INPUT:
@@ -33,13 +38,12 @@ Respond ONLY with a valid JSON object matching this exact schema:
   "description": "Rich 2-3 paragraph marketplace description highlighting craftsmanship, materials, and utility",
   "description_hi": "हिंदी में सुंदर विवरण",
   "category": "One of: pottery, textiles, metalwork, paintings, woodwork, jewellery",
-  "suggested_price_min": number,
-  "suggested_price_max": number,
   "materials": ["Material 1", "Material 2"],
   "craft_name": "Traditional craft name",
   "region": "District, State",
   "state": "State",
   "district": "District",
+  "dimensions": { "length": 18, "width": 10, "height": 16, "unit": "cm" },
   "heritage_story_draft": "Narrative about artisan generational heritage",
   "traditional_technique": "Detailed technique explanation",
   "cultural_significance": "Cultural or ritual significance",
@@ -47,34 +51,25 @@ Respond ONLY with a valid JSON object matching this exact schema:
   "gi_tag_applicable": boolean,
   "gi_registry_number": string or null,
   "gi_candidacy_status": "candidate_unverified" or "not_applicable",
-  "confidence_notes": ["Notes on classification and pricing rationale"],
-  "pricing_breakdown": {
-    "raw_materials_cost": number,
-    "artisan_labor_hours": number,
-    "hourly_living_wage": number,
-    "fair_artisan_wage_total": number,
-    "suggested_min_price": number,
-    "suggested_max_price": number,
-    "ondc_export_markup_suggestion": number,
-    "rationale": "Detailed narrative explaining pricing formula"
-  },
+  "confidence_notes": ["Notes on classification and technique"],
   "ai_understanding": {
-    "speech_keywords": ["keyword 1", "keyword 2"],
-    "detected_visual_features": ["feature 1", "feature 2"],
+    "craft_name": "Craft name",
+    "region": "Region name",
     "detected_materials": ["mat 1", "mat 2"],
-    "voice_language_detected": "hi",
-    "inferred_cluster": "Cluster name",
-    "confidence_score": number between 0 and 1,
-    "craft_technique_candidate": "Technique name",
+    "detected_motifs": ["motif 1"],
+    "language_detected": "hi",
+    "confidence_score": 0.95,
+    "speech_keywords": ["keyword 1", "keyword 2"],
+    "visual_features": ["feature 1", "feature 2"],
     "safety_check_passed": true,
     "gi_candidacy_note": "Explanation of GI candidacy status"
   },
   "heritage_claims": [
     {
       "claim_text": "Specific claim about craft or material",
-      "source_type": "artisan" | "ai" | "official",
-      "verification_status": "verified" | "requires_verification" | "unverified",
-      "source_reference": "Brief note on verification source"
+      "source_type": "artisan",
+      "verification_status": "verified",
+      "source_reference": "Spoken artisan description"
     }
   ]
 }
@@ -123,7 +118,30 @@ Respond ONLY with a valid JSON object matching this exact schema:
       }
 
       const parsed = JSON.parse(rawText);
-      return GenerateListingOutputSchema.parse(parsed);
+
+      // Perform genuine Market Price Discovery on the extracted attributes
+      const attributes: ComparisonAttributes = {
+        product_type: parsed.title || "Handmade Artisan Craft",
+        craft: parsed.craft_name || "Traditional Craft",
+        category: parsed.category || "woodwork",
+        material: (parsed.materials || []).join(" / "),
+        technique: parsed.traditional_technique,
+        region: parsed.region,
+        dimensions: parsed.dimensions ? `${parsed.dimensions.length}x${parsed.dimensions.width}x${parsed.dimensions.height} cm` : null,
+        handmade: true,
+      };
+
+      const discovery = await marketPriceDiscoveryService.discoverMarketPrice(attributes);
+
+      return {
+        ...parsed,
+        suggested_price_min: discovery.priceAnalysis.recommended_min,
+        suggested_price_max: discovery.priceAnalysis.recommended_max,
+        price_analysis: discovery.priceAnalysis,
+        comparison_attributes: attributes,
+        cost_reference: discovery.optionalCostReference,
+        pricing_breakdown: discovery.legacyPricingBreakdown,
+      };
     } catch (err) {
       console.warn("Gemini generation notice, using deterministic mock", err);
       const { MockListingAIService } = await import("./mock-ai");
