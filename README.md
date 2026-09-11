@@ -1,4 +1,4 @@
-# KarigarSetu (कारीगर सेतु) — SIH26090
+l# KarigarSetu (कारीगर सेतु) — SIH26090
 > **Smart India Hackathon 2026** | **Theme: Heritage and Culture**  
 > *AI-Powered Artisan Onboarding Assistant & National Living Heritage Vault*
 
@@ -32,7 +32,7 @@ India has millions of traditional artisans crafting pottery, handlooms, bell met
 
 ## Core Flow
 
-$$\text{Artisan Login} \longrightarrow \text{Studio} \longrightarrow \text{Voice + Photo} \longrightarrow \text{What AI Understood} \longrightarrow \text{Multimodal Analysis} \longrightarrow \text{Price Rationale \& Heritage Audit} \longrightarrow \text{Approve} \longrightarrow \text{Vault \& ONDC Export}$$
+$$\text{Artisan Login} \longrightarrow \text{Studio} \longrightarrow \text{Voice + Photo} \longrightarrow \text{What AI Understood} \longrightarrow \text{Multimodal Analysis} \longrightarrow \text{Price Rationale \and Heritage Audit} \longrightarrow \text{Approve} \longrightarrow \text{Vault \and ONDC Export}$$
 
 ---
 
