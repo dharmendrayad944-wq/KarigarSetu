@@ -83,14 +83,14 @@ export class MockListingAIService implements AIProvider, IListingAIService {
         cultural_significance: "Living heritage linked to the Indus Valley metallurgical tradition, revered as protective tribal totems.",
         heritage_story_draft: "Cast in the forested hamlets of Kondagaon, each Dokra sculpture is born from hand-rolled beeswax thread spirals, encased in termite clay, baked in open pit fires, and birthed by breaking the single-use mold.",
         gi_status: "gi_registered",
-        gi_demo_reference: "GI Application Ref #83 (Demo Reference)",
+        gi_demo_reference: "GI-Registered Craft",
         gi_tag_applicable: true,
         gi_registry_number: null,
-        gi_candidacy_status: "registered_verified",
+        gi_candidacy_status: "candidate_unverified",
         confidence_notes: [
           "Technique detected: Lost-wax casting with twisted wax filigree (Confidence: 96%)",
           "Regional provenance matched: Bastar / Kondagaon craft cluster",
-          "GI Reference: Candidate cluster matches Bastar Dhokra (Demo Reference #83)",
+          "GI Reference: Candidate cluster matches Bastar Dhokra (Craft-Level Recognition)",
           `Market Discovery: ${discovery.priceAnalysis.comparable_count} comparable products found across approved marketplace sources (Amazon, Flipkart, ONDC).`,
           "Artisan Sovereignty: Recommended range is an indicative market reference. The artisan decides the final price.",
         ],
@@ -104,7 +104,7 @@ export class MockListingAIService implements AIProvider, IListingAIService {
           speech_keywords: ["ढोकरा", "घंटी धातु", "मोम ढलाई", "बस्तर", "नंदी बैल", "पीतल"],
           visual_features: ["Twisted wax wire texture", "Hollow core bronze casting", "Bovine horned silhouette"],
           safety_check_passed: true,
-          gi_candidacy_note: "Matches registered Bastar Dhokra craft cluster in Intellectual Property India records (Demo Reference #83)",
+          gi_candidacy_note: "Matches registered Bastar Dhokra craft cluster in Intellectual Property India records (Craft-Level Recognition)",
         },
         heritage_claims: [
           {
@@ -122,7 +122,7 @@ export class MockListingAIService implements AIProvider, IListingAIService {
             source_type: "official",
             provenance_label: "Verified Source",
             verification_status: "verified",
-            source_reference: "Government GI Registry India (Demo Reference #83)",
+            source_reference: "Government GI Registry India (Craft-Level Recognition)",
             is_demo_reference: true,
           },
           {
@@ -194,14 +194,14 @@ export class MockListingAIService implements AIProvider, IListingAIService {
         cultural_significance: "Brought to Jaipur in the 19th century under Maharaja Sawai Ram Singh II; famous for being impermeable and free from crazing.",
         heritage_story_draft: "Hand-shaped from Rajasthan's mineral quartz, this piece fuses Mughal-Persian cobalt aesthetics with the vibrant spirit of Rajasthan's royal artisan traditions.",
         gi_status: "gi_registered",
-        gi_demo_reference: "GI Application Ref #66 (Demo Reference)",
+        gi_demo_reference: "GI-Registered Craft",
         gi_tag_applicable: true,
         gi_registry_number: null,
-        gi_candidacy_status: "registered_verified",
+        gi_candidacy_status: "candidate_unverified",
         confidence_notes: [
           "Technique detected: Non-clay Egyptian faience / Jaipur quartz ceramics (Confidence: 94%)",
           "Color analysis: Authentic cobalt and copper oxide glaze palette",
-          "GI Reference: Candidate cluster matches Jaipur Blue Pottery (Demo Reference #66)",
+          "GI Reference: Candidate cluster matches Jaipur Blue Pottery (Craft-Level Recognition)",
           `Market Discovery: ${discovery.priceAnalysis.comparable_count} comparable products found across approved marketplace sources.`,
           "Artisan Sovereignty: Final selling price is chosen by the artisan.",
         ],
@@ -215,7 +215,7 @@ export class MockListingAIService implements AIProvider, IListingAIService {
           speech_keywords: ["ब्लू पॉटरी", "क्वार्ट्ज़", "मुल्तानी मिट्टी", "कोबाल्ट नीला", "बिना मिट्टी"],
           visual_features: ["Cobalt blue glaze gloss", "Turquoise botanical infill", "Semi-porous non-thrown body"],
           safety_check_passed: true,
-          gi_candidacy_note: "Registered Geographical Indication in Jaipur cluster (Demo Reference #66)",
+          gi_candidacy_note: "Registered Geographical Indication in Jaipur cluster (Craft-Level Recognition)",
         },
         heritage_claims: [
           {
@@ -233,7 +233,7 @@ export class MockListingAIService implements AIProvider, IListingAIService {
             source_type: "official",
             provenance_label: "Verified Source",
             verification_status: "verified",
-            source_reference: "GI Registry India (Demo Reference #66)",
+            source_reference: "GI Registry India (Craft-Level Recognition)",
             is_demo_reference: true,
           },
         ],
@@ -295,14 +295,14 @@ export class MockListingAIService implements AIProvider, IListingAIService {
         cultural_significance: "Traditional ritual art form rooted in the Mithila kingdom; passed down matrilineally across centuries.",
         heritage_story_draft: "Hand-drawn line by line using colors brewed from marigold flowers, turmeric, and neem gum, capturing the timeless blessings of Mithila.",
         gi_status: "gi_registered",
-        gi_demo_reference: "GI Application Ref #45 (Demo Reference)",
+        gi_demo_reference: "GI-Registered Craft",
         gi_tag_applicable: true,
         gi_registry_number: null,
-        gi_candidacy_status: "registered_verified",
+        gi_candidacy_status: "candidate_unverified",
         confidence_notes: [
           "Technique detected: Mithila Kachni/Bharni line-work (Confidence: 97%)",
           "Material detected: Hand-extracted plant pigments on textured medium",
-          "GI Reference: Registered GI craft of Mithila region (Demo Reference #45)",
+          "GI Reference: Registered GI craft of Mithila region (Craft-Level Recognition)",
           `Market Discovery: ${discovery.priceAnalysis.comparable_count} comparable products analyzed across approved market sources.`,
           "Artisan Sovereignty: Final selling price is chosen by the artisan.",
         ],
@@ -316,7 +316,7 @@ export class MockListingAIService implements AIProvider, IListingAIService {
           speech_keywords: ["कोहबर", "मिथिला", "बांस की सींक", "प्राकृतिक रंग", "हल्दी", "नील"],
           visual_features: ["Double-line border framing", "Kachni hatching fill", "Matsya symbol profile"],
           safety_check_passed: true,
-          gi_candidacy_note: "Registered GI craft of Mithila region, Bihar (Demo Reference #45)",
+          gi_candidacy_note: "Registered GI craft of Mithila region, Bihar (Craft-Level Recognition)",
         },
         heritage_claims: [
           {
@@ -330,11 +330,11 @@ export class MockListingAIService implements AIProvider, IListingAIService {
           },
           {
             id: `claim-${Date.now()}-2`,
-            claim_text: "Protected under Geographical Indications of Goods Act (Demo Reference #45).",
+            claim_text: "Protected under Geographical Indications of Goods Act (Craft-Level Recognition).",
             source_type: "official",
             provenance_label: "Verified Source",
             verification_status: "verified",
-            source_reference: "GI Registry India (Demo Reference #45)",
+            source_reference: "GI Registry India (Craft-Level Recognition)",
             is_demo_reference: true,
           },
         ],
@@ -395,10 +395,10 @@ export class MockListingAIService implements AIProvider, IListingAIService {
         cultural_significance: "Historical Gombegala Ooru craft initiated by Tipu Sultan using Persian artisan exchange.",
         heritage_story_draft: "Carved from sustainably pruned seasoned ivory wood, polished with friction heat and edible vegetable hues.",
         gi_status: "gi_registered",
-        gi_demo_reference: "GI Application Ref #12 (Demo Reference)",
+        gi_demo_reference: "GI-Registered Craft",
         gi_tag_applicable: true,
         gi_registry_number: null,
-        gi_candidacy_status: "registered_verified",
+        gi_candidacy_status: "candidate_unverified",
         confidence_notes: [
           "Technique detected: Traditional lathe-turned organic lacquering",
           "Safety check: 100% Non-toxic vegetable dyes verified",
@@ -415,7 +415,7 @@ export class MockListingAIService implements AIProvider, IListingAIService {
           speech_keywords: ["खिलौना", "लकड़ी", "चन्नपट्टना", "प्राकृतिक"],
           visual_features: ["Smooth lathe concentric finish", "Glossy natural shellac coat"],
           safety_check_passed: true,
-          gi_candidacy_note: "Registered GI craft of Karnataka (Demo Reference #12)",
+          gi_candidacy_note: "Registered GI craft of Karnataka (Craft-Level Recognition)",
         },
         heritage_claims: [
           {
@@ -504,7 +504,7 @@ export class MockListingAIService implements AIProvider, IListingAIService {
         speech_keywords: ["हस्तनिर्मित", "स्थानीय", "परंपरा", "कारीगर"],
         visual_features: ["Hand-tooled surface texture", "Natural organic color variations"],
         safety_check_passed: true,
-        gi_candidacy_note: "No verified GI candidate identified for this cluster item; verification required.",
+        gi_candidacy_note: "No registered GI craft identified for this cluster item; requires verification.",
       },
       heritage_claims: [
         {
@@ -583,6 +583,18 @@ export class MockListingAIService implements AIProvider, IListingAIService {
   }
 
   // Backwards compatibility
+  
+  async explainMarketComparison(
+    target: ComparisonAttributes,
+    priceAnalysis: PriceAnalysis
+  ): Promise<string> {
+    const count = priceAnalysis.comparable_count;
+    const median = priceAnalysis.median_price.toLocaleString("en-IN");
+    const min = priceAnalysis.recommended_min.toLocaleString("en-IN");
+    const max = priceAnalysis.recommended_max.toLocaleString("en-IN");
+    return `Identified ${count} comparable ${target.craft} products across approved platforms (Amazon, Flipkart, ONDC). The market median is ₹${median}, with an indicative recommended range of ₹${min} – ₹${max}. Final pricing remains the sovereign decision of the artisan.`;
+  }
+
   async generateListingCompatibility(input: GenerateListingInput): Promise<GenerateListingOutput> {
     return this.generateListing(input);
   }

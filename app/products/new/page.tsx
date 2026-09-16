@@ -9,6 +9,8 @@ import { Product } from "@/lib/db/schema";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { ProvenanceBadge } from "@/components/ui/Badge";
+import { ImageFallback } from "@/components/ui/ImageFallback";
+import { preprocessArtisanImage } from "@/lib/utils/image-processor";
 import {
   Camera,
   Mic,
@@ -28,7 +30,7 @@ import {
   Check,
 } from "lucide-react";
 
-// Pre-configured authentic craft samples matching SIH scenarios
+// Pre-configured authentic craft samples matching SIH scenarios (All 8 Regional Crafts)
 const SAMPLE_CRAFTS = [
   {
     name: "Bastar Dhokra Nandi Bull",
@@ -38,9 +40,10 @@ const SAMPLE_CRAFTS = [
     region: "Bastar, Chhattisgarh",
     material: "Bell metal alloy / beeswax / core clay",
     motif: "Peacock / Nandi Horns / Filigree",
+    technique: "Cire-Perdue (Lost-Wax) Metallurgy",
     language: "Hindi",
     confidence: "96%",
-    imageUrl: "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80",
+    imageUrl: "/crafts/bastar-dhokra.jpg",
     audioTranscript: "यह बस्तर का पारंपरिक ढोकरा शिल्प है, जिसे घंटी धातु और मधुमक्खी के मोम की लॉस्ट-वैक्स तकनीक से हाथ से ढाला गया है। यह नंदी बैल की पवित्र प्रतिमा है।",
     state: "Chhattisgarh",
     district: "Bastar",
@@ -55,9 +58,10 @@ const SAMPLE_CRAFTS = [
     region: "Jaipur, Rajasthan",
     material: "Ceramic / quartz pottery / multani mitti",
     motif: "Persian Arabesque / Lotus",
+    technique: "Non-Clay Quartz Mineral Glazing",
     language: "Hindi",
     confidence: "94%",
-    imageUrl: "https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=800&q=80",
+    imageUrl: "/crafts/jaipur-blue-pottery.jpg",
     audioTranscript: "यह जयपुर की पारंपरिक ब्लू पॉटरी का फूलदान है, जिसे बिना मिट्टी के क्वार्ट्ज़ पत्थर और मुल्तानी मिट्टी से हाथ से बनाया गया है। इस पर कोबाल्ट नीले और फिरोज़ी रंग के बेल-बूटे हैं।",
     state: "Rajasthan",
     district: "Jaipur",
@@ -72,9 +76,10 @@ const SAMPLE_CRAFTS = [
     region: "Madhubani, Bihar",
     material: "Cotton rag paper / vegetable dyes",
     motif: "Matsya / Lotus / Sun & Moon",
+    technique: "Bamboo Nib Freehand Line Drawing",
     language: "Hindi / Maithili",
     confidence: "97%",
-    imageUrl: "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=800&q=80",
+    imageUrl: "/crafts/madhubani-painting.jpg",
     audioTranscript: "यह मधुबनी की पारंपरिक कोहबर पेंटिंग है, जिसे हाथ से बने कागज़ पर बांस की सींक और हल्दी, नील व गेंदे के प्राकृतिक रंगों से बनाया गया है।",
     state: "Bihar",
     district: "Madhubani",
@@ -89,9 +94,10 @@ const SAMPLE_CRAFTS = [
     region: "Channapatna, Karnataka",
     material: "Hale wood / natural button lac",
     motif: "Concentric Rings / Radial Geometry",
+    technique: "Lathe-Turned Friction Shellac Lacquering",
     language: "Hindi / Kannada",
     confidence: "98%",
-    imageUrl: "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?auto=format&fit=crop&w=800&q=80",
+    imageUrl: "/crafts/channapatna-toys.jpg",
     audioTranscript: "यह चन्नापट्टना का पारंपरिक लकड़ी का खिलौना है, जिसे हाले की लकड़ी और प्राकृतिक लाख से बाल-सुरक्षित वनस्पति रंगों में तैयार किया गया है।",
     state: "Karnataka",
     district: "Ramanagara",
@@ -106,9 +112,10 @@ const SAMPLE_CRAFTS = [
     region: "Varanasi, Uttar Pradesh",
     material: "Pure Katan Mulberry Silk / Zari",
     motif: "Floral Jaal / Kadhwa Booti",
+    technique: "Pit-Loom Interlocked Kadhwa Weft Weaving",
     language: "Hindi",
     confidence: "97%",
-    imageUrl: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80",
+    imageUrl: "/crafts/banarasi-silk.jpg",
     audioTranscript: "यह बनारस की कतान सिल्क की शुद्ध हैंडलूम साड़ी है, जिस पर पारंपरिक कढ़वा तकनीक से सोने-चांदी के तारों का ज़री काम किया गया है।",
     state: "Uttar Pradesh",
     district: "Varanasi",
@@ -123,9 +130,10 @@ const SAMPLE_CRAFTS = [
     region: "Bhuj, Gujarat",
     material: "Cotton canvas / silk floss / glass mirrors",
     motif: "Suf Geometric / Abhala Mirrors",
+    technique: "Counted-Thread Warp/Weft Needlework",
     language: "Hindi / Gujarati",
     confidence: "95%",
-    imageUrl: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=800&q=80",
+    imageUrl: "/crafts/kutch-embroidery.jpg",
     audioTranscript: "यह कच्छ की सूफ कढ़ाई और अभला का काम है, जिसमें बिना किसी खाके के सुई से धागों की गिनती करके ज्यामितीय पैटर्न और शीशे जड़े गए हैं।",
     state: "Gujarat",
     district: "Kutch",
@@ -140,14 +148,33 @@ const SAMPLE_CRAFTS = [
     region: "Raghurajpur, Odisha",
     material: "Treated Palm Leaves (Tala Patra) / natural soot",
     motif: "Krishna Leela / Tree of Life",
+    technique: "Iron Stylus Incision & Natural Pigment Rub",
     language: "Hindi / Odia",
     confidence: "96%",
-    imageUrl: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=800&q=80",
+    imageUrl: "/crafts/pattachitra.jpg",
     audioTranscript: "यह ओडिशा के रघुराजपुर का ताड़पत्र पट्टचित्र है। सूखे ताड़ के पत्तों पर लोहे की लेखनी से उत्कीर्ण करके प्राकृतिक काजल और रंगों से भरा गया है।",
     state: "Odisha",
     district: "Puri",
     keywords: ["पट्टचित्र", "ताड़पत्र", "रघुराजपुर", "लेखनी", "प्राकृतिक रंग"],
     visualFeatures: ["Palm leaf panel stitching", "Fine iron stylus incised lines", "Conch white & lampblack fill"],
+  },
+  {
+    name: "Kashmiri Papier-Mâché Box",
+    artisan: "Ghulam Nabi",
+    category: "woodwork",
+    craft: "Kashmiri Papier-Mâché",
+    region: "Srinagar, Jammu & Kashmir",
+    material: "Recycled paper pulp / rice paste / pure gold leaf",
+    motif: "Hazara Floral / Gul-o-Bulbul",
+    technique: "Sakhtsazi (Molding) & Naqashi (Fine Miniature Painting)",
+    language: "Hindi / Kashmiri",
+    confidence: "96%",
+    imageUrl: "/crafts/kashmiri-papier-mache.jpg",
+    audioTranscript: "यह कश्मीर का पारंपरिक पेपर-मैशी हस्तशिल्प है, जिसे कागज़ की लुगदी और प्राकृतिक रंगों से हाथ से तराश कर सोने के पानी के नक्काश काम से सजाया गया है।",
+    state: "Jammu & Kashmir",
+    district: "Srinagar",
+    keywords: ["पेपर-मैशी", "कागज़ की लुगदी", "सख्तसाज़ी", "नक़्क़ाशी", "श्रीनगर"],
+    visualFeatures: ["Paper pulp layered substrate", "Hand-painted polychrome florals", "Varnish coat with gold foil accent"],
   },
 ];
 
@@ -177,6 +204,14 @@ export default function AddProductPage() {
   const [state, setState] = useState<string>(SAMPLE_CRAFTS[0].state);
   const [district, setDistrict] = useState<string>(SAMPLE_CRAFTS[0].district);
 
+  // What AI Understood inline editable states (Phase 18 Human-in-the-loop)
+  const [understoodCraft, setUnderstoodCraft] = useState<string>(SAMPLE_CRAFTS[0].craft);
+  const [understoodRegion, setUnderstoodRegion] = useState<string>(SAMPLE_CRAFTS[0].region);
+  const [understoodMaterial, setUnderstoodMaterial] = useState<string>(SAMPLE_CRAFTS[0].material);
+  const [understoodMotif, setUnderstoodMotif] = useState<string>(SAMPLE_CRAFTS[0].motif);
+  const [understoodTechnique, setUnderstoodTechnique] = useState<string>(SAMPLE_CRAFTS[0].technique);
+  const [isEditingUnderstood, setIsEditingUnderstood] = useState<boolean>(false);
+
   // Extracted preview tokens
   const [previewKeywords, setPreviewKeywords] = useState<string[]>(SAMPLE_CRAFTS[0].keywords);
   const [previewFeatures, setPreviewFeatures] = useState<string[]>(SAMPLE_CRAFTS[0].visualFeatures);
@@ -184,18 +219,54 @@ export default function AddProductPage() {
   // Audio recording states
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [recordingSeconds, setRecordingSeconds] = useState<number>(0);
+  const [isRealSpeechCaptured, setIsRealSpeechCaptured] = useState<boolean>(false);
+  const [isFallbackTranscript, setIsFallbackTranscript] = useState<boolean>(false);
+  const [isSpeechRecognitionSupported, setIsSpeechRecognitionSupported] = useState<boolean>(true);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const textFallbackRef = useRef<HTMLTextAreaElement>(null);
 
   // Processing states
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [currentStepIndex, setCurrentStepIndex] = useState<number>(0);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [imageError, setImageError] = useState<string | null>(null);
+  const [isProcessingImage, setIsProcessingImage] = useState<boolean>(false);
+
+  // Browser capability detection on mount
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const supported = Boolean("webkitSpeechRecognition" in window || "SpeechRecognition" in window);
+      setIsSpeechRecognitionSupported(supported);
+    }
+  }, []);
 
   // Handle Recording simulation or real mic
   const startRecording = async () => {
+    // Capability detection check (P2-1)
+    const hasSpeechSupport =
+      typeof window !== "undefined" &&
+      ("webkitSpeechRecognition" in window || "SpeechRecognition" in window);
+
+    if (!hasSpeechSupport) {
+      setIsSpeechRecognitionSupported(false);
+      setIsRealSpeechCaptured(false);
+      setIsFallbackTranscript(true);
+      const unsupportedNotice =
+        language === "hi"
+          ? "लाइव वाक् पहचान इस ब्राउज़र में समर्थित नहीं है। कृपया नीचे दिए गए टेक्स्ट बॉक्स में विवरण दर्ज करें या डेमो वॉइस विकल्प चुनें।"
+          : "Live voice recognition is not supported in this browser. Please use the Text Input below or choose a Demo Voice sample.";
+      setVoiceTranscript(unsupportedNotice);
+      setEditedTranscript(unsupportedNotice);
+      setIsEditingTranscript(true);
+      return;
+    }
     try {
       setIsRecording(true);
       setRecordingSeconds(0);
+      setIsRealSpeechCaptured(false);
+      setIsFallbackTranscript(false);
+      setVoiceTranscript("");
+      setEditedTranscript("");
       timerRef.current = setInterval(() => {
         setRecordingSeconds((prev) => prev + 1);
       }, 1000);
@@ -212,7 +283,9 @@ export default function AddProductPage() {
           for (let i = event.resultIndex; i < event.results.length; ++i) {
             transcript += event.results[i][0].transcript;
           }
-          if (transcript) {
+          if (transcript.trim()) {
+            setIsRealSpeechCaptured(true);
+            setIsFallbackTranscript(false);
             setVoiceTranscript(transcript);
             setEditedTranscript(transcript);
             const tokens = transcript.split(/\s+/).filter((w: string) => w.length > 3).slice(0, 5);
@@ -222,6 +295,7 @@ export default function AddProductPage() {
 
         recognition.onerror = (e: any) => {
           console.warn("Speech recognition notice:", e);
+          setIsRealSpeechCaptured(false);
         };
 
         recognition.start();
@@ -229,6 +303,8 @@ export default function AddProductPage() {
       }
     } catch (e) {
       console.warn("Mic access notice:", e);
+      setIsRealSpeechCaptured(false);
+      setIsFallbackTranscript(true);
     }
   };
 
@@ -243,35 +319,52 @@ export default function AddProductPage() {
       } catch (e) {}
     }
 
-    if (!voiceTranscript) {
+    if (!isRealSpeechCaptured) {
       const defaultSpoken =
         language === "hi"
           ? "यह हाथ से बनाई हुई बस्तर की ढोकरा शिल्प कलाकृति है, जो पीतल और मोम ढलाई से निर्मित है।"
           : "This is a handmade Bastar Dhokra craft creation made with brass bell metal and lost-wax technique.";
       setVoiceTranscript(defaultSpoken);
       setEditedTranscript(defaultSpoken);
+      setIsRealSpeechCaptured(false);
+      setIsFallbackTranscript(true);
       setPreviewKeywords(["ढोकरा", "घंटी धातु", "मोम ढलाई", "बस्तर"]);
     }
   };
 
-  // Handle local image file upload
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle local image file upload with client-side downsampling (P0-1 robust fix)
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      if (event.target?.result) {
-        setImageUrl(event.target.result as string);
-        setPreviewFeatures(["Uploaded user photograph", "Visual texture analysis active"]);
-      }
-    };
-    reader.readAsDataURL(file);
+    setImageError(null);
+    setIsProcessingImage(true);
+
+    try {
+      const result = await preprocessArtisanImage(file, {
+        maxDimension: 1024,
+        quality: 0.75,
+      });
+
+      setImageUrl(result.dataUrl);
+      setPreviewFeatures([
+        "Uploaded user photograph (optimized for digital catalog)",
+        `${result.width}×${result.height}px • ~${Math.round(result.compressedSizeBytes / 1024)} KB`,
+      ]);
+    } catch (err: any) {
+      console.error("Image upload/compression error:", err);
+      setImageError(err.message || "Failed to process image. Please choose a different photo.");
+    } finally {
+      setIsProcessingImage(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
   };
 
   // Quick pick sample craft
   const selectSample = (sample: (typeof SAMPLE_CRAFTS)[0], idx: number) => {
     setSelectedSampleIndex(idx);
+    setIsRealSpeechCaptured(false);
+    setIsFallbackTranscript(false);
     setImageUrl(sample.imageUrl);
     setVoiceTranscript(sample.audioTranscript);
     setEditedTranscript(sample.audioTranscript);
@@ -279,6 +372,12 @@ export default function AddProductPage() {
     setSelectedCategory(sample.category);
     setState(sample.state);
     setDistrict(sample.district);
+    setUnderstoodCraft(sample.craft);
+    setUnderstoodRegion(sample.region);
+    setUnderstoodMaterial(sample.material);
+    setUnderstoodMotif(sample.motif);
+    setUnderstoodTechnique(sample.technique);
+    setIsEditingUnderstood(false);
     setPreviewKeywords(sample.keywords);
     setPreviewFeatures(sample.visualFeatures);
     setErrorMsg(null);
@@ -326,6 +425,10 @@ export default function AddProductPage() {
           voice_transcript: voiceTranscript,
           text_description: textFallback,
           selected_category: selectedCategory,
+          craft_name: understoodCraft,
+          materials: understoodMaterial,
+          motifs: understoodMotif,
+          traditional_technique: understoodTechnique,
           artisan_location: { state, district },
           language,
         }),
@@ -350,7 +453,7 @@ export default function AddProductPage() {
         description: aiData.description,
         description_hi: aiData.description_hi || aiData.description,
         category: aiData.category,
-        craft_name: aiData.craft_name,
+        craft_name: understoodCraft || aiData.craft_name,
         state: aiData.state || state,
         district: aiData.district || district,
         materials: aiData.materials,
@@ -380,7 +483,7 @@ export default function AddProductPage() {
         status: "artisan_review", // Explicit approval required before publication
         featured_image_url: imageUrl,
         gi_status: aiData.gi_status || "gi_candidate_unverified",
-        gi_demo_reference: aiData.gi_demo_reference,
+        gi_demo_reference: aiData.gi_demo_reference || "GI-Registered Craft",
         gi_tag_applicable: aiData.gi_tag_applicable,
         gi_registry_number: null, // Strict: no fake identifiers
         gi_candidacy_status: aiData.gi_candidacy_status || "candidate_unverified",
@@ -388,23 +491,23 @@ export default function AddProductPage() {
         heritage_record: {
           id: `hr-${newProductId}`,
           product_id: newProductId,
-          craft_name: aiData.craft_name,
-          region: `${aiData.district}, ${aiData.state}`,
+          craft_name: understoodCraft || aiData.craft_name,
+          region: `${aiData.district || district}, ${aiData.state || state}`,
           state: aiData.state || state,
           district: aiData.district || district,
           artisan_name: SAMPLE_CRAFTS[selectedSampleIndex]?.artisan || "Master Artisan",
-          traditional_technique: aiData.traditional_technique,
+          traditional_technique: understoodTechnique || aiData.traditional_technique,
           materials: aiData.materials,
           motifs: aiData.motifs,
           cultural_story: aiData.cultural_significance,
           artisan_story: aiData.heritage_story_draft,
           original_language: language === "hi" ? "Hindi" : "English",
           gi_status: aiData.gi_status || "gi_candidate_unverified",
-          gi_demo_reference: aiData.gi_demo_reference,
+          gi_demo_reference: aiData.gi_demo_reference || "GI-Registered Craft",
           preservation_urgency: "high",
           sources: [
             {
-              title: `${aiData.craft_name} Heritage Guild Documentation`,
+              title: `${understoodCraft || aiData.craft_name} Heritage Guild Documentation`,
               type: "Regional Guild Archive",
               is_demo: true,
             },
@@ -416,23 +519,23 @@ export default function AddProductPage() {
         heritage_profile: {
           id: `hr-${newProductId}`,
           product_id: newProductId,
-          craft_name: aiData.craft_name,
-          region: `${aiData.district}, ${aiData.state}`,
+          craft_name: understoodCraft || aiData.craft_name,
+          region: `${aiData.district || district}, ${aiData.state || state}`,
           state: aiData.state || state,
           district: aiData.district || district,
           artisan_name: SAMPLE_CRAFTS[selectedSampleIndex]?.artisan || "Master Artisan",
-          traditional_technique: aiData.traditional_technique,
+          traditional_technique: understoodTechnique || aiData.traditional_technique,
           materials: aiData.materials,
           motifs: aiData.motifs,
           cultural_story: aiData.cultural_significance,
           artisan_story: aiData.heritage_story_draft,
           original_language: language === "hi" ? "Hindi" : "English",
           gi_status: aiData.gi_status || "gi_candidate_unverified",
-          gi_demo_reference: aiData.gi_demo_reference,
+          gi_demo_reference: aiData.gi_demo_reference || "GI-Registered Craft",
           preservation_urgency: "high",
           sources: [
             {
-              title: `${aiData.craft_name} Heritage Guild Documentation`,
+              title: `${understoodCraft || aiData.craft_name} Heritage Guild Documentation`,
               type: "Regional Guild Archive",
               is_demo: true,
             },
@@ -464,10 +567,10 @@ export default function AddProductPage() {
           <ShieldCheck className="w-5 h-5 text-[#C2410C] shrink-0 mt-0.5" />
           <div className="text-xs sm:text-sm text-stone-700 leading-relaxed">
             <strong className="text-[#9A3412] font-semibold block sm:inline">
-              Artisan Voice → AI Onboarding & Digital Heritage Vault:
+              Artisan Voice → AI Onboarding & KarigarSetu Living Heritage Vault:
             </strong>{" "}
             Photograph your handmade craft and speak naturally in your mother tongue. KarigarSetu synthesizes structured
-            commercial listings and preserves traditional techniques in the Living Heritage Vault.
+            commercial listings, conducts market price discovery, and archives traditional techniques.
           </div>
         </div>
 
@@ -485,7 +588,7 @@ export default function AddProductPage() {
           </p>
         </div>
 
-        {/* Quick Sample Selector for SIH Hackathon Demo */}
+        {/* Quick Sample Selector for SIH Hackathon Demo (8 Authentic Traditions) */}
         <div className="bg-white p-4 sm:p-5 rounded-2xl craft-border-subtle shadow-xs space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-[#C2410C] flex items-center gap-1.5">
@@ -512,9 +615,11 @@ export default function AddProductPage() {
                   }`}
                 >
                   <div className="relative w-11 h-11 rounded-lg overflow-hidden bg-stone-100 shrink-0">
-                    <Image
+                    <ImageFallback
                       src={sample.imageUrl}
                       alt={sample.name}
+                      craft={sample.craft}
+                      region={sample.district}
                       fill
                       className="object-cover"
                       sizes="44px"
@@ -568,9 +673,11 @@ export default function AddProductPage() {
 
               {imageUrl ? (
                 <>
-                  <Image
+                  <ImageFallback
                     src={imageUrl}
                     alt="Craft upload preview"
+                    craft={understoodCraft}
+                    region={district}
                     fill
                     className="object-cover"
                     sizes="400px"
@@ -594,7 +701,27 @@ export default function AddProductPage() {
               )}
             </div>
 
-            {imageUrl && (
+            {imageError && (
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs flex items-center justify-between">
+                <span>{imageError}</span>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="font-bold underline ml-2 text-rose-900 cursor-pointer"
+                >
+                  Retry Upload
+                </button>
+              </div>
+            )}
+
+            {isProcessingImage && (
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-xs flex items-center gap-2">
+                <RefreshCw className="w-3.5 h-3.5 animate-spin text-amber-600" />
+                <span>Optimizing photograph (target &lt; 300 KB)...</span>
+              </div>
+            )}
+
+            {imageUrl && !isProcessingImage && (
               <div className="flex items-center justify-between text-xs text-stone-500">
                 <span className="flex items-center gap-1 text-emerald-700 font-medium">
                   <CheckCircle2 className="w-4 h-4" /> Photo ready for visual morphology AI
@@ -613,17 +740,99 @@ export default function AddProductPage() {
           {/* Step 2: Voice Spoken Description */}
           <Card className="flex flex-col justify-between space-y-4">
             <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center text-[#C2410C] font-bold text-sm">
-                  2
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center text-[#C2410C] font-bold text-sm">
+                    2
+                  </div>
+                  <h3 className="text-lg font-bold font-serif text-stone-900">
+                    {t.stepVoiceTitle}
+                  </h3>
                 </div>
-                <h3 className="text-lg font-bold font-serif text-stone-900">
-                  {t.stepVoiceTitle}
-                </h3>
+                {/* Voice Transparency Badge */}
+                {isRecording ? (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-red-100 text-red-800 border border-red-300">
+                    <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse inline-block"></span>
+                    RECORDING ({recordingSeconds}s)
+                  </span>
+                ) : isRealSpeechCaptured ? (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+                    LIVE VOICE
+                  </span>
+                ) : isFallbackTranscript ? (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                    <span className="w-2 h-2 rounded-full bg-amber-500 inline-block"></span>
+                    FALLBACK TRANSCRIPT
+                  </span>
+                ) : voiceTranscript && voiceTranscript === SAMPLE_CRAFTS[selectedSampleIndex]?.audioTranscript ? (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                    <span className="w-2 h-2 rounded-full bg-amber-500 inline-block"></span>
+                    DEMO VOICE
+                  </span>
+                ) : voiceTranscript ? (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                    <span className="w-2 h-2 rounded-full bg-amber-500 inline-block"></span>
+                    FALLBACK TRANSCRIPT
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-stone-100 text-stone-600 border border-stone-200">
+                    NO VOICE INPUT
+                  </span>
+                )}
               </div>
               <p className="text-xs text-stone-600">
                 {t.stepVoiceDesc}
               </p>
+              {/* Compatibility Warning if Web Speech API is unsupported (P2-1) */}
+              {!isSpeechRecognitionSupported && (
+                <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-xs space-y-1.5">
+                  <div className="flex items-center gap-1.5 font-bold text-amber-950">
+                    <Info className="w-4 h-4 text-amber-600 shrink-0" />
+                    <span>{t.liveVoiceUnavailableTitle}</span>
+                  </div>
+                  <p className="leading-relaxed text-amber-800">
+                    {t.liveVoiceUnavailableDesc}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        textFallbackRef.current?.scrollIntoView({ behavior: "smooth" });
+                        textFallbackRef.current?.focus();
+                      }}
+                      className="px-2.5 py-1 bg-amber-200 hover:bg-amber-300 text-amber-950 font-semibold rounded-lg text-[11px] transition cursor-pointer"
+                    >
+                      ✏️ Use Text Input
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => selectSample(SAMPLE_CRAFTS[selectedSampleIndex], selectedSampleIndex)}
+                      className="px-2.5 py-1 bg-white border border-amber-300 hover:bg-amber-100 text-amber-900 font-semibold rounded-lg text-[11px] transition cursor-pointer"
+                    >
+                      🎙️ Use Demo Voice Sample
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Voice status explanation */}
+              {isRealSpeechCaptured ? (
+                <div className="text-[11px] text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-lg px-2.5 py-1.5 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 shrink-0 text-emerald-600" />
+                  <span><strong>Live Voice</strong> — Spoken audio transcribed live via speech recognition.</span>
+                </div>
+              ) : isFallbackTranscript ? (
+                <div className="text-[11px] text-amber-900 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5 flex items-center gap-1.5">
+                  <Info className="w-3.5 h-3.5 shrink-0 text-amber-600" />
+                  <span><strong>Fallback Transcript</strong> — No speech was captured or microphone was silent. You may edit the transcript below or type a description.</span>
+                </div>
+              ) : voiceTranscript && voiceTranscript === SAMPLE_CRAFTS[selectedSampleIndex]?.audioTranscript ? (
+                <div className="text-[11px] text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5 flex items-center gap-1.5">
+                  <Info className="w-3.5 h-3.5 shrink-0 text-amber-600" />
+                  <span><strong>Demo Transcript</strong> — Live speech recognition unavailable in this mode. Record your own voice to use LIVE VOICE.</span>
+                </div>
+              ) : null}
             </div>
 
             {/* Voice Recording Box */}
@@ -700,7 +909,7 @@ export default function AddProductPage() {
                         <button
                           type="button"
                           onClick={handleSaveEditedTranscript}
-                          className="px-3 py-1 bg-[#C2410C] text-white rounded-md text-[11px] font-semibold hover:bg-[#9A3412] flex items-center gap-1"
+                          className="px-3 py-1 bg-[#C2410C] text-white rounded-md text-[11px] font-semibold hover:bg-[#9A3412] flex items-center gap-1 cursor-pointer"
                         >
                           <Check className="w-3 h-3" /> Save Transcript
                         </button>
@@ -725,6 +934,7 @@ export default function AddProductPage() {
                 {t.textFallbackPrompt}
               </label>
               <textarea
+                ref={textFallbackRef}
                 rows={2}
                 value={textFallback}
                 onChange={(e) => setTextFallback(e.target.value)}
@@ -735,7 +945,7 @@ export default function AddProductPage() {
           </Card>
         </div>
 
-        {/* Step 4: What AI Understood Pre-Generation Transparent Display */}
+        {/* Step 4: What AI Understood Pre-Generation Transparent Display (Phase 18 with Inline Corrections) */}
         <div className="bg-white rounded-2xl p-5 sm:p-6 craft-border-subtle shadow-xs space-y-4">
           <div className="flex items-center justify-between border-b border-stone-100 pb-3">
             <div className="flex items-center gap-2">
@@ -751,45 +961,118 @@ export default function AddProductPage() {
                 </p>
               </div>
             </div>
-            <span className="text-[11px] font-bold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-200">
-              Multimodal Pre-Analysis
-            </span>
-          </div>
-
-          {/* Structured Key-Value Grid Matching Prompt Specification */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
-            <div className="p-3 bg-[#FAF7F2] rounded-xl border border-stone-200">
-              <span className="text-stone-500 font-medium block text-[11px]">Craft:</span>
-              <strong className="text-stone-900 text-sm">{currentSample.craft}</strong>
-            </div>
-
-            <div className="p-3 bg-[#FAF7F2] rounded-xl border border-stone-200">
-              <span className="text-stone-500 font-medium block text-[11px]">Region:</span>
-              <strong className="text-stone-900 text-sm">{currentSample.region}</strong>
-            </div>
-
-            <div className="p-3 bg-[#FAF7F2] rounded-xl border border-stone-200">
-              <span className="text-stone-500 font-medium block text-[11px]">Material:</span>
-              <strong className="text-stone-900 text-sm">{currentSample.material}</strong>
-            </div>
-
-            <div className="p-3 bg-[#FAF7F2] rounded-xl border border-stone-200">
-              <span className="text-stone-500 font-medium block text-[11px]">Motif:</span>
-              <strong className="text-stone-900 text-sm">{currentSample.motif}</strong>
-            </div>
-
-            <div className="p-3 bg-[#FAF7F2] rounded-xl border border-stone-200">
-              <span className="text-stone-500 font-medium block text-[11px]">Language:</span>
-              <strong className="text-stone-900 text-sm">{currentSample.language}</strong>
-            </div>
-
-            <div className="p-3 bg-[#FAF7F2] rounded-xl border border-stone-200">
-              <span className="text-stone-500 font-medium block text-[11px]">Confidence:</span>
-              <strong className="text-emerald-700 text-sm font-bold flex items-center gap-1">
-                <CheckCircle2 className="w-3.5 h-3.5" /> {currentSample.confidence}
-              </strong>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setIsEditingUnderstood(!isEditingUnderstood)}
+                className="text-xs text-[#C2410C] font-semibold flex items-center gap-1 hover:underline cursor-pointer"
+              >
+                <Edit3 className="w-3.5 h-3.5" />
+                {isEditingUnderstood ? "Cancel Corrections" : "Correct / Edit If Misunderstood"}
+              </button>
+              <span className="text-[11px] font-bold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-200 hidden sm:inline">
+                Multimodal Pre-Analysis
+              </span>
             </div>
           </div>
+
+          {/* Phase 18: Editable fields if AI misunderstood */}
+          {isEditingUnderstood ? (
+            <div className="p-4 bg-orange-50/60 rounded-xl border border-orange-200 space-y-3 text-xs">
+              <div className="font-bold text-stone-900">Artisan Corrections (Edit directly):</div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="font-semibold text-stone-700 block mb-1">Craft Name:</label>
+                  <input
+                    type="text"
+                    value={understoodCraft}
+                    onChange={(e) => setUnderstoodCraft(e.target.value)}
+                    className="w-full p-2 border border-stone-300 rounded-lg text-xs text-stone-900 bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="font-semibold text-stone-700 block mb-1">Region / District:</label>
+                  <input
+                    type="text"
+                    value={understoodRegion}
+                    onChange={(e) => setUnderstoodRegion(e.target.value)}
+                    className="w-full p-2 border border-stone-300 rounded-lg text-xs text-stone-900 bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="font-semibold text-stone-700 block mb-1">Natural Materials:</label>
+                  <input
+                    type="text"
+                    value={understoodMaterial}
+                    onChange={(e) => setUnderstoodMaterial(e.target.value)}
+                    className="w-full p-2 border border-stone-300 rounded-lg text-xs text-stone-900 bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="font-semibold text-stone-700 block mb-1">Traditional Motifs:</label>
+                  <input
+                    type="text"
+                    value={understoodMotif}
+                    onChange={(e) => setUnderstoodMotif(e.target.value)}
+                    className="w-full p-2 border border-stone-300 rounded-lg text-xs text-stone-900 bg-white"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="font-semibold text-stone-700 block mb-1">Traditional Technique:</label>
+                  <input
+                    type="text"
+                    value={understoodTechnique}
+                    onChange={(e) => setUnderstoodTechnique(e.target.value)}
+                    className="w-full p-2 border border-stone-300 rounded-lg text-xs text-stone-900 bg-white"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end pt-1">
+                <button
+                  type="button"
+                  onClick={() => setIsEditingUnderstood(false)}
+                  className="px-4 py-1.5 bg-[#C2410C] text-white rounded-lg text-xs font-bold hover:bg-[#9A3412] flex items-center gap-1 cursor-pointer"
+                >
+                  <Check className="w-3.5 h-3.5" /> Save Corrections
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* Structured Key-Value Grid Matching Prompt Specification */
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
+              <div className="p-3 bg-[#FAF7F2] rounded-xl border border-stone-200">
+                <span className="text-stone-500 font-medium block text-[11px]">Craft:</span>
+                <strong className="text-stone-900 text-sm">{understoodCraft}</strong>
+              </div>
+
+              <div className="p-3 bg-[#FAF7F2] rounded-xl border border-stone-200">
+                <span className="text-stone-500 font-medium block text-[11px]">Region:</span>
+                <strong className="text-stone-900 text-sm">{understoodRegion}</strong>
+              </div>
+
+              <div className="p-3 bg-[#FAF7F2] rounded-xl border border-stone-200">
+                <span className="text-stone-500 font-medium block text-[11px]">Material:</span>
+                <strong className="text-stone-900 text-sm">{understoodMaterial}</strong>
+              </div>
+
+              <div className="p-3 bg-[#FAF7F2] rounded-xl border border-stone-200">
+                <span className="text-stone-500 font-medium block text-[11px]">Motif:</span>
+                <strong className="text-stone-900 text-sm">{understoodMotif}</strong>
+              </div>
+
+              <div className="p-3 bg-[#FAF7F2] rounded-xl border border-stone-200">
+                <span className="text-stone-500 font-medium block text-[11px]">Language:</span>
+                <strong className="text-stone-900 text-sm">{currentSample.language}</strong>
+              </div>
+
+              <div className="p-3 bg-[#FAF7F2] rounded-xl border border-stone-200">
+                <span className="text-stone-500 font-medium block text-[11px]">Confidence:</span>
+                <strong className="text-emerald-700 text-sm font-bold flex items-center gap-1">
+                  <CheckCircle2 className="w-3.5 h-3.5" /> {currentSample.confidence}
+                </strong>
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
             {/* Extracted Speech Keywords */}
@@ -831,7 +1114,7 @@ export default function AddProductPage() {
           <div className="p-3 bg-amber-50/80 border border-amber-300 rounded-xl flex items-center gap-2 text-xs text-amber-950">
             <Info className="w-4 h-4 text-amber-800 shrink-0" />
             <span>
-              <strong>GI Integrity Guard:</strong> AI never invents official registration numbers. Crafts matching official GI clusters are marked as <em>[GI Candidate — Verification Required]</em> until confirmed by stored guild records.
+              <strong>GI Integrity Guard:</strong> AI never invents official registration numbers. Crafts matching registered clusters are labeled as <em>[GI-Registered Craft]</em> while individual product certification remains <em>[GI Verification Pending]</em> until confirmed by stored guild records.
             </span>
           </div>
         </div>
@@ -857,7 +1140,7 @@ export default function AddProductPage() {
             {isProcessing ? t.analyzingCraft : "Generate Listing & Heritage Profile"}
           </Button>
           <div className="text-xs text-stone-500 mt-2">
-            Step 8 will require explicit artisan review & approval before publication
+            Artisan review & approval will be strictly required before publication
           </div>
         </div>
 
@@ -872,10 +1155,10 @@ export default function AddProductPage() {
 
               <div className="space-y-1">
                 <h3 className="text-xl font-bold font-serif text-stone-900">
-                  Step 5: Multimodal AI Processing
+                  Multimodal AI Processing Pipeline
                 </h3>
                 <p className="text-xs text-stone-500">
-                  Synthesizing product listing and Living Heritage Vault passport
+                  Synthesizing product listing and KarigarSetu Living Heritage Vault passport
                 </p>
               </div>
 

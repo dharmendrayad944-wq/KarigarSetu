@@ -8,12 +8,55 @@ export type SourceType = "artisan" | "ai" | "official";
 export type VerificationStatus = "verified" | "requires_verification" | "unverified" | "rejected";
 
 export type ProvenanceStatus = 
-  | "Artisan Provided"
-  | "AI Generated"
-  | "AI Suggested"
-  | "Verified Source"
-  | "Requires Verification"
-  | "Demo Data";
+  | "ARTISAN_PROVIDED"
+  | "ARTISAN_ATTESTED"
+  | "AI_SUGGESTED"
+  | "SOURCE_PROVIDED"
+  | "REQUIRES_VERIFICATION"
+  | "VERIFIED_SOURCE"
+  | "GI_REGISTERED_CRAFT"
+  | "GI_AUTHORISED_USER"
+  | "DEMO_DATA";
+
+export const SourceRecordSchema = z.object({
+  source_id: z.string(),
+  source_name: z.string(),
+  source_type: z.string(), // "Government Registry" | "Academic Archive" | "Craft Guild" | "Field Documentation" | "Artisan Oral Lineage"
+  source_url: z.string(),
+  retrieved_at: z.string().default(() => new Date().toISOString()),
+  verification_status: z.enum(["VERIFIED_SOURCE", "REQUIRES_VERIFICATION", "SOURCE_PROVIDED"]).default("VERIFIED_SOURCE"),
+  notes: z.string().optional(),
+});
+
+export type SourceRecord = z.infer<typeof SourceRecordSchema>;
+
+export const ImageAttributionSchema = z.object({
+  image_url: z.string(),
+  source_name: z.string(),
+  source_url: z.string(),
+  license_type: z.string(),
+  attribution_required: z.boolean().default(true),
+  attribution_text: z.string(),
+  retrieved_at: z.string().default(() => new Date().toISOString()),
+});
+
+export type ImageAttribution = z.infer<typeof ImageAttributionSchema>;
+
+export const PriceDecisionAuditSchema = z.object({
+  id: z.string().default(() => `pda-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`),
+  product_id: z.string(),
+  previous_price: z.number().nullable().optional(),
+  new_price: z.number().positive(),
+  recommended_min: z.number().positive(),
+  recommended_max: z.number().positive(),
+  market_median: z.number().positive().optional(),
+  changed_by: z.enum(["artisan", "system_initial"]).default("artisan"),
+  changed_at: z.string().default(() => new Date().toISOString()),
+  reason: z.string().optional(),
+  source_analysis_id: z.string().optional(),
+});
+
+export type PriceDecisionAudit = z.infer<typeof PriceDecisionAuditSchema>;
 
 export type GIStatus =
   | "not_applicable"
@@ -196,23 +239,31 @@ export type PricingBreakdown = z.infer<typeof PricingBreakdownSchema>;
 // ==============================================================================
 // 4. HERITAGE CLAIMS (Atomic verification trail)
 // ==============================================================================
+// 4. HERITAGE CLAIMS (Atomic verification trail)
+// ==============================================================================
 export const HeritageClaimSchema = z.object({
   id: z.string().optional(),
   heritage_record_id: z.string().optional(),
   claim_text: z.string().min(3, "Claim text must be at least 3 characters"),
   source_type: z.enum(["artisan", "official", "ai"]),
-  provenance_label: z.enum([
-    "Artisan Provided",
-    "AI Generated",
-    "AI Suggested",
-    "Verified Source",
-    "Requires Verification",
-    "Demo Data"
-  ]).default("Requires Verification"),
+  provenance_status: z.enum([
+    "ARTISAN_PROVIDED",
+    "ARTISAN_ATTESTED",
+    "AI_SUGGESTED",
+    "SOURCE_PROVIDED",
+    "REQUIRES_VERIFICATION",
+    "VERIFIED_SOURCE",
+    "GI_REGISTERED_CRAFT",
+    "GI_AUTHORISED_USER",
+    "DEMO_DATA"
+  ]).default("REQUIRES_VERIFICATION").optional(),
+  provenance_label: z.string().default("Requires Verification").optional(),
   verification_status: z.enum(["verified", "requires_verification", "unverified", "rejected"]).default("requires_verification"),
   source_reference: z.string().nullable().optional(),
-  source_url: z.string().url().nullable().optional(),
-  is_demo_reference: z.boolean().default(false),
+  source_url: z.string().nullable().optional(),
+  source_record: SourceRecordSchema.optional(),
+  is_artisan_attested: z.boolean().default(false).optional(),
+  is_demo_reference: z.boolean().default(false).optional(),
   verified_by: z.string().nullable().optional(),
   verified_at: z.string().nullable().optional(),
 });
@@ -291,6 +342,7 @@ export const ProductSchema = z.object({
   final_price: z.number().positive().nullable().optional(),
   price_analysis: PriceAnalysisSchema.optional(),
   artisan_price_decision: ArtisanPriceDecisionSchema.optional(),
+  price_audit_trail: z.array(PriceDecisionAuditSchema).default([]).optional(),
   comparison_attributes: ComparisonAttributesSchema.optional(),
   cost_reference: CostReferenceSchema.optional(),
   pricing_breakdown: PricingBreakdownSchema.optional(), // Backwards compatibility
@@ -309,7 +361,11 @@ export const ProductSchema = z.object({
   // Visuals & GI status
   featured_image_url: z.string().min(1, "Featured image URL is required"),
   additional_images: z.array(z.string()).default([]),
+  image_attribution: ImageAttributionSchema.optional(),
   gi_status: z.enum(["not_applicable", "gi_candidate_unverified", "gi_applied", "gi_registered"]).default("gi_candidate_unverified"),
+  gi_craft_status: z.enum(["GI_REGISTERED_CRAFT", "GI_CANDIDATE", "NOT_APPLICABLE"]).default("GI_CANDIDATE").optional(),
+  gi_authorised_user_status: z.enum(["VERIFIED_AUTHORISED_USER", "NOT_VERIFIED", "APPLICATION_IN_PROGRESS"]).default("NOT_VERIFIED").optional(),
+  gi_official_url: z.string().optional(),
   gi_demo_reference: z.string().nullable().optional(),
   gi_tag_applicable: z.boolean().default(false),
   gi_registry_number: z.string().nullable().optional(),
@@ -341,6 +397,10 @@ export const GenerateListingInputSchema = z.object({
   image_url: z.string().min(1, "Product image is required"),
   voice_transcript: z.string().optional(),
   text_description: z.string().optional(),
+  craft_name: z.string().optional(),
+  materials: z.union([z.string(), z.array(z.string())]).optional(),
+  motifs: z.union([z.string(), z.array(z.string())]).optional(),
+  traditional_technique: z.string().optional(),
   artisan_location: z.object({
     state: z.string().default("Rajasthan"),
     district: z.string().default("Jaipur"),
@@ -417,3 +477,20 @@ export const ArtisanProfileSchema = z.object({
 });
 
 export type ArtisanProfile = z.infer<typeof ArtisanProfileSchema>;
+
+// ==============================================================================
+// 9. NETWORK EVENT & DISCOVERY MODEL (P0-3 Truthful Operational Architecture)
+// ==============================================================================
+export const NetworkEventSchema = z.object({
+  id: z.string().default(() => `ne-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`),
+  product_id: z.string(),
+  craft_name: z.string().optional(),
+  network: z.enum(["ONDC", "GeM", "TribesIndia", "Direct"]),
+  event_type: z.enum(["inquiry", "discovery_ping", "catalog_sync", "rfq"]),
+  buyer_region: z.string().optional(),
+  message: z.string().optional(),
+  created_at: z.string().default(() => new Date().toISOString()),
+  mode: z.enum(["demo", "live"]).default("demo"),
+});
+
+export type NetworkEvent = z.infer<typeof NetworkEventSchema>;

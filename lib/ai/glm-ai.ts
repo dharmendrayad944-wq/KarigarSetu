@@ -200,4 +200,15 @@ IMPORTANT: NEVER invent fake government GI registration numbers. If referencing 
       is_optional_reference: true,
     };
   }
+
+  async explainMarketComparison(
+    target: ComparisonAttributes,
+    priceAnalysis: PriceAnalysis
+  ): Promise<string> {
+    const count = priceAnalysis.comparable_count;
+    const median = priceAnalysis.median_price.toLocaleString("en-IN");
+    const min = priceAnalysis.recommended_min.toLocaleString("en-IN");
+    const max = priceAnalysis.recommended_max.toLocaleString("en-IN");
+    return `Analysis based on ${count} comparable ${target.craft} products across approved marketplace sources (Amazon, Flipkart, ONDC). Market median is ₹${median} with an indicative range of ₹${min} – ₹${max}. Final price is decided by the artisan.`;
+  }
 }

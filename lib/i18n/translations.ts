@@ -53,6 +53,8 @@ export interface Translations {
   rerecord: string;
   textFallbackPrompt: string;
   textFallbackPlaceholder: string;
+  liveVoiceUnavailableTitle: string;
+  liveVoiceUnavailableDesc: string;
   generateListingButton: string;
   analyzingCraft: string;
 
@@ -89,6 +91,7 @@ export interface Translations {
   // Verification & Heritage
   provenanceTitle: string;
   artisanProvided: string;
+  artisanAttested: string;
   aiInferred: string;
   verifiedOfficial: string;
   requiresVerification: string;
@@ -166,6 +169,8 @@ export const translations: Record<Language, Translations> = {
     rerecord: "Record Again",
     textFallbackPrompt: "Prefer to write or paste instead? (Optional fallback)",
     textFallbackPlaceholder: "e.g. This is a handmade brass Dokra bell metal figurine of an elephant, made using the lost wax method in Bastar...",
+    liveVoiceUnavailableTitle: "Live Voice Unavailable in this Browser",
+    liveVoiceUnavailableDesc: "Speech recognition is not supported in this browser. You can enter craft details using Text Input below or choose an authentic Demo Voice sample.",
     generateListingButton: "Analyze Craft with Multimodal AI",
     analyzingCraft: "Transcribing speech & analyzing visual craft morphology...",
 
@@ -198,6 +203,7 @@ export const translations: Record<Language, Translations> = {
 
     provenanceTitle: "Heritage Provenance & Verification Audit",
     artisanProvided: "Artisan-Provided",
+    artisanAttested: "Artisan Attested",
     aiInferred: "AI-Inferred",
     verifiedOfficial: "Verified Official",
     requiresVerification: "Requires Verification",
@@ -271,6 +277,8 @@ export const translations: Record<Language, Translations> = {
     rerecord: "फिर से रिकॉर्ड करें",
     textFallbackPrompt: "लिखना या पेस्ट करना चाहते हैं? (वैकल्पिक)",
     textFallbackPlaceholder: "उदा. यह बस्तर की पारंपरिक ढोकरा घंटी धातु से बनी हाथी की मूर्ति है, जिसे लॉस्ट-वैक्स विधि से बनाया गया है...",
+    liveVoiceUnavailableTitle: "लाइव वॉइस इस ब्राउज़र में समर्थित नहीं है",
+    liveVoiceUnavailableDesc: "इस ब्राउज़र में वाक् पहचान उपलब्ध नहीं है। कृपया नीचे दिए गए टेक्स्ट बॉक्स में विवरण दर्ज करें या डेमो वॉइस विकल्प चुनें।",
     generateListingButton: "मल्टीमॉडल AI से शिल्प का विश्लेषण करें",
     analyzingCraft: "वाणी का प्रतिलेखन एवं शिल्प संरचना का विश्लेषण जारी है...",
 
@@ -303,6 +311,7 @@ export const translations: Record<Language, Translations> = {
 
     provenanceTitle: "धरोहर स्रोत और सत्यापन ऑडिट",
     artisanProvided: "कारीगर द्वारा बताया गया",
+    artisanAttested: "कारीगर द्वारा सत्यापित ज्ञान",
     aiInferred: "AI द्वारा अनुमानित",
     verifiedOfficial: "प्रमाणित आधिकारिक",
     requiresVerification: "सत्यापन अपेक्षित",

@@ -21,6 +21,10 @@ export interface AIProvider {
     cultural_story: string;
     claims: HeritageClaim[];
   }>;
+  explainMarketComparison?(
+    target: ComparisonAttributes,
+    priceAnalysis: PriceAnalysis
+  ): Promise<string>;
   discoverMarketPrice?(attributes: ComparisonAttributes): Promise<PriceAnalysis>;
   generatePriceEstimate?(params: {
     material_cost?: number;

@@ -17,7 +17,7 @@ interface CraftCluster {
   imageUrl: string;
   productId: string;
   giState: "GI Registered Craft" | "GI Candidate — Verification Required";
-  demoReference: string;
+  craftStatus: string;
 }
 
 const CRAFT_CLUSTERS: CraftCluster[] = [
@@ -32,7 +32,7 @@ const CRAFT_CLUSTERS: CraftCluster[] = [
     imageUrl: "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80",
     productId: "prod-dokra-01",
     giState: "GI Registered Craft",
-    demoReference: "Demo Ref #83",
+    craftStatus: "GI-Registered Craft",
   },
   {
     state: "Rajasthan",
@@ -45,7 +45,7 @@ const CRAFT_CLUSTERS: CraftCluster[] = [
     imageUrl: "https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=800&q=80",
     productId: "prod-blue-pottery-02",
     giState: "GI Registered Craft",
-    demoReference: "Demo Ref #66",
+    craftStatus: "GI-Registered Craft",
   },
   {
     state: "Bihar",
@@ -58,7 +58,7 @@ const CRAFT_CLUSTERS: CraftCluster[] = [
     imageUrl: "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=800&q=80",
     productId: "prod-madhubani-03",
     giState: "GI Registered Craft",
-    demoReference: "Demo Ref #45",
+    craftStatus: "GI-Registered Craft",
   },
   {
     state: "Karnataka",
@@ -71,7 +71,7 @@ const CRAFT_CLUSTERS: CraftCluster[] = [
     imageUrl: "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?auto=format&fit=crop&w=800&q=80",
     productId: "prod-channapatna-04",
     giState: "GI Registered Craft",
-    demoReference: "Demo Ref #19",
+    craftStatus: "GI-Registered Craft",
   },
   {
     state: "Uttar Pradesh",
@@ -84,7 +84,7 @@ const CRAFT_CLUSTERS: CraftCluster[] = [
     imageUrl: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80",
     productId: "prod-banarasi-05",
     giState: "GI Registered Craft",
-    demoReference: "Demo Ref #99",
+    craftStatus: "GI-Registered Craft",
   },
   {
     state: "Gujarat",
@@ -97,7 +97,7 @@ const CRAFT_CLUSTERS: CraftCluster[] = [
     imageUrl: "https://images.unsplash.com/photo-1609357605129-26f69add5d6e?auto=format&fit=crop&w=800&q=80",
     productId: "prod-kutch-06",
     giState: "GI Registered Craft",
-    demoReference: "Demo Ref #112",
+    craftStatus: "GI-Registered Craft",
   },
   {
     state: "Odisha",
@@ -110,7 +110,7 @@ const CRAFT_CLUSTERS: CraftCluster[] = [
     imageUrl: "https://images.unsplash.com/photo-1582738411706-bfc8e691d1c2?auto=format&fit=crop&w=800&q=80",
     productId: "prod-pattachitra-07",
     giState: "GI Registered Craft",
-    demoReference: "Demo Ref #87",
+    craftStatus: "GI-Registered Craft",
   },
   {
     state: "Jammu & Kashmir",
@@ -123,7 +123,7 @@ const CRAFT_CLUSTERS: CraftCluster[] = [
     imageUrl: "https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=800&q=80",
     productId: "prod-kashmiri-08",
     giState: "GI Registered Craft",
-    demoReference: "Demo Ref #103",
+    craftStatus: "GI-Registered Craft",
   },
 ];
 
@@ -143,7 +143,7 @@ export const CraftExplorer: React.FC = () => {
             Explore India&apos;s Living Craft Heritage
           </h3>
           <p className="text-xs sm:text-sm text-stone-600 mt-1">
-            Discover indigenous craft knowledge preserved across 8 states and registered in the National Heritage Vault
+            Discover indigenous craft knowledge preserved across 8 states and documented in the KarigarSetu Living Heritage Vault
           </p>
         </div>
 
@@ -209,7 +209,7 @@ export const CraftExplorer: React.FC = () => {
             <div className="flex items-center gap-2 text-xs font-bold text-[#C2410C] uppercase tracking-wider">
               <span>{activeCluster.state}</span>
               <span>•</span>
-              <span className="text-stone-500 font-mono text-[11px]">{activeCluster.demoReference}</span>
+              <span className="text-stone-500 font-mono text-[11px]">{activeCluster.craftStatus}</span>
             </div>
             <h4 className="text-2xl font-bold font-serif text-stone-900">
               {activeCluster.craftName}

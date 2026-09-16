@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Sparkles, Info, X } from "lucide-react";
+import { Sparkles, X } from "lucide-react";
 import { useLanguage } from "@/components/providers/LanguageContext";
 
 export const DemoBanner: React.FC = () => {
@@ -17,12 +17,12 @@ export const DemoBanner: React.FC = () => {
       <div className="flex items-center gap-2 max-w-5xl mx-auto w-full">
         <span className="inline-flex items-center gap-1 bg-white/20 px-2 py-0.5 rounded-full text-[11px] font-bold tracking-wide uppercase">
           <Sparkles className="w-3 h-3 text-amber-300" />
-          {t.demoModeBadge}
+          AI Demo Mode
         </span>
         <span className="hidden sm:inline">
-          SIH 2026 Presentation Mode — Deterministic Multimodal AI & Verified Heritage Claims enabled out-of-the-box without external keys.
+          SIH 2026 Demo Mode Active — Experience voice-first AI onboarding and Living Heritage Vault discovery.
         </span>
-        <span className="sm:hidden">SIH Demo AI Mode Active</span>
+        <span className="sm:hidden">SIH Demo Mode Active</span>
       </div>
       <button
         onClick={() => setDismissed(true)}

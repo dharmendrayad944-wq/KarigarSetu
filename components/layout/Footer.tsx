@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { useLanguage } from "@/components/providers/LanguageContext";
-import { Palette, Heart, ShieldCheck, CheckCircle2, Award, Sparkles } from "lucide-react";
+import { Palette, Heart, ShieldCheck, CheckCircle2 } from "lucide-react";
 
 export const Footer: React.FC = () => {
   const { language } = useLanguage();
@@ -28,7 +28,7 @@ export const Footer: React.FC = () => {
             </p>
             <div className="flex items-center gap-2 text-xs text-amber-400 font-medium">
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span>National Living Heritage Vault & Market Price Discovery Engine</span>
+              <span>KarigarSetu Living Heritage Vault & Market Price Discovery Engine</span>
             </div>
           </div>
 
@@ -66,7 +66,7 @@ export const Footer: React.FC = () => {
             </ul>
           </div>
 
-          {/* Col 3: Heritage Integrity Architecture */}
+          {/* Col 3: Heritage Integrity Architecture (Phase 33) */}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-4">
               Heritage Integrity

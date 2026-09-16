@@ -1,13 +1,14 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import Image from "next/image";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/components/providers/LanguageContext";
 import { ProductRepository } from "@/lib/db/repository";
+import { DEMO_PRODUCTS } from "@/lib/data/demo-products";
 import { Product } from "@/lib/db/schema";
 import { Card } from "@/components/ui/Card";
 import { GICandidacyBadge, ProvenanceBadge } from "@/components/ui/Badge";
+import { ImageFallback } from "@/components/ui/ImageFallback";
 import {
   Search,
   MapPin,
@@ -15,22 +16,22 @@ import {
   ShieldCheck,
   CheckCircle2,
   AlertTriangle,
-  ExternalLink,
-  Layers,
-  Sparkles,
+  TrendingUp,
   User,
 } from "lucide-react";
 
 export default function CataloguePage() {
   const { t, language } = useLanguage();
-  const [products, setProducts] = useState<Product[]>([]);
+  // Deterministic SSR & initial client render from shared static dataset
+  const [products, setProducts] = useState<Product[]>(DEMO_PRODUCTS);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedState, setSelectedState] = useState("all");
 
+  // Load client persisted data after mount to prevent hydration mismatch
   useEffect(() => {
-    const list = ProductRepository.getProducts();
-    setProducts(list);
+    const stored = ProductRepository.getProducts();
+    setProducts(stored);
   }, []);
 
   // Filter logic
@@ -50,7 +51,14 @@ export default function CataloguePage() {
     return matchesSearch && matchesCategory && matchesState;
   });
 
-  const availableStates = Array.from(new Set(products.map((p) => p.state))).filter(Boolean);
+  // Deterministically sorted states to prevent insertion-order hydration mismatch
+  const availableStates = Array.from(
+    new Set(
+      products
+        .map((p) => p.state)
+        .filter(Boolean)
+    )
+  ).sort((a, b) => a.localeCompare(b));
 
   return (
     <div className="flex-1 bg-[#FAF7F2] py-8 sm:py-12">
@@ -65,7 +73,10 @@ export default function CataloguePage() {
             Heritage Market Listings
           </h1>
           <p className="text-stone-600 text-sm sm:text-base">
-            Handcrafted creations with verified living heritage profiles, transparent market price analysis, and direct artisan attribution.
+            Handcrafted creations with documented living heritage profiles, benchmark market price analysis, and direct artisan attribution.
+          </p>
+          <p className="text-[11px] text-stone-500 italic max-w-2xl mx-auto">
+            Real craft photographs sourced from Wikimedia Commons with attribution and licensing metadata. These images represent the craft tradition and are not claimed to be photographs of the demo artisan.
           </p>
         </div>
 
@@ -137,7 +148,7 @@ export default function CataloguePage() {
           </div>
         </div>
 
-        {/* Product Cards Grid: Enhanced with Section 17 Heritage Attributes */}
+        {/* Product Cards Grid: Phase 22 Standard */}
         {filteredProducts.length === 0 ? (
           <Card className="text-center py-16 space-y-3">
             <div className="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center mx-auto text-stone-400">
@@ -158,11 +169,13 @@ export default function CataloguePage() {
                   key={product.id}
                   className="bg-white rounded-3xl craft-border-subtle overflow-hidden flex flex-col hover:shadow-lg transition-all duration-300 group border border-stone-200"
                 >
-                  {/* Image Container */}
+                  {/* Image Container with Fallback */}
                   <div className="relative h-60 w-full bg-stone-100 overflow-hidden">
-                    <Image
+                    <ImageFallback
                       src={product.featured_image_url}
                       alt={product.title}
+                      craft={product.craft_name}
+                      region={`${product.district}, ${product.state}`}
                       fill
                       className="object-cover group-hover:scale-104 transition-transform duration-500"
                       sizes="(max-width: 768px) 100vw, 33vw"
@@ -186,7 +199,7 @@ export default function CataloguePage() {
                         <span className="font-bold text-[#C2410C] uppercase tracking-wide">
                           {product.craft_name}
                         </span>
-                        <span className="text-stone-500 font-medium">{product.state}</span>
+                        <span className="text-stone-500 font-medium">{product.district}, {product.state}</span>
                       </div>
 
                       <h2 className="text-lg font-bold text-stone-900 font-serif leading-snug line-clamp-2">
@@ -200,7 +213,7 @@ export default function CataloguePage() {
                       </p>
                     </div>
 
-                    {/* Section 17 Heritage Status Indicators */}
+                    {/* Phase 22 Required Status Pills */}
                     <div className="p-3 bg-[#FAF7F2] rounded-2xl border border-stone-200 space-y-1.5 text-xs">
                       <div className="flex items-center gap-1.5 text-emerald-800 font-semibold">
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
@@ -208,28 +221,32 @@ export default function CataloguePage() {
                       </div>
                       <div className="flex items-center gap-1.5 text-emerald-800 font-semibold">
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                        <span>Digital heritage profile active</span>
+                        <span>Heritage profile available</span>
                       </div>
                       <div className="flex items-center gap-1.5 text-stone-700">
                         {isRegisteredGi ? (
                           <>
                             <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                             <span className="font-medium text-emerald-900">
-                              {product.gi_demo_reference || "GI registered craft"}
+                              {product.gi_demo_reference || "GI-Registered Craft"}
                             </span>
                           </>
                         ) : (
                           <>
                             <AlertTriangle className="w-3.5 h-3.5 text-amber-700 shrink-0" />
-                            <span className="text-amber-900 font-medium">GI candidate (Verification required)</span>
+                            <span className="text-amber-900 font-medium">GI verification pending</span>
                           </>
                         )}
                       </div>
                     </div>
 
+                    {/* Market Price Range Display */}
                     <div className="pt-2 border-t border-stone-100 space-y-3">
                       <div className="flex items-baseline justify-between">
-                        <span className="text-xs text-stone-500">Fair Price Range:</span>
+                        <span className="text-xs text-stone-500 flex items-center gap-1">
+                          <TrendingUp className="w-3.5 h-3.5 text-[#C2410C]" />
+                          Market Price Range:
+                        </span>
                         <span className="text-base font-extrabold text-stone-900 font-serif">
                           ₹{product.suggested_min_price.toLocaleString("en-IN")} – ₹{product.suggested_max_price.toLocaleString("en-IN")}
                         </span>

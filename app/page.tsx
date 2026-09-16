@@ -2,7 +2,6 @@
 
 import React from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useLanguage } from "@/components/providers/LanguageContext";
 import {
   Sparkles,
@@ -12,17 +11,16 @@ import {
   ArrowRight,
   Camera,
   CheckCircle2,
-  Layers,
   Award,
-  BookOpen,
   Cpu,
-  AlertTriangle,
-  FileCheck2,
+  BookOpen,
   Users,
-  Compass,
-  Check,
+  ExternalLink,
+  Layers,
+  HeartHandshake,
 } from "lucide-react";
 import { ProvenanceBadge } from "@/components/ui/Badge";
+import { ImageFallback } from "@/components/ui/ImageFallback";
 import { InteractiveDemo } from "@/components/home/InteractiveDemo";
 import { CraftExplorer } from "@/components/heritage/CraftExplorer";
 
@@ -57,7 +55,7 @@ export default function Home() {
               </h1>
 
               <p className="text-base sm:text-lg text-stone-700 max-w-2xl leading-relaxed mx-auto lg:mx-0">
-                An AI-powered artisan onboarding and digital heritage platform. Transforming local-language speech and smartphone photos into structured marketplace listings, while archiving India&apos;s endangered techniques in the National Living Heritage Vault.
+                An AI-powered artisan onboarding and digital heritage platform. Transforming local-language speech and smartphone photos into structured marketplace listings, while documenting India&apos;s traditional craft techniques in the KarigarSetu Living Heritage Vault.
               </p>
 
               {/* Not Another Marketplace Positioning Badge */}
@@ -91,21 +89,27 @@ export default function Home() {
             <div className="lg:col-span-5">
               <div className="relative mx-auto max-w-md bg-white rounded-3xl p-5 shadow-xl border-2 border-[#E7E0D3] rotate-1 hover:rotate-0 transition-transform duration-300 space-y-4">
                 <div className="relative h-64 rounded-2xl overflow-hidden bg-stone-100">
-                  <Image
-                    src="https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80"
+                  <ImageFallback
+                    src="/crafts/bastar-dhokra.jpg"
                     alt="Bastar Dhokra Handcrafted Metal Art"
+                    craft="Bastar Dhokra"
+                    region="Bastar, Chhattisgarh"
                     fill
                     className="object-cover"
                     sizes="(max-width: 768px) 100vw, 400px"
                     priority
                   />
                   <div className="absolute top-3 left-3">
-                    <ProvenanceBadge label="GI Registered Craft" size="sm" />
+                    <ProvenanceBadge label="GI-Registered Craft" size="sm" />
                   </div>
                   <div className="absolute bottom-3 right-3 bg-black/80 backdrop-blur-xs text-white text-xs px-2.5 py-1 rounded-md font-medium">
                     Bastar, Chhattisgarh
                   </div>
                 </div>
+
+                <p className="text-[10px] text-stone-500 leading-tight">
+                  Real craft photograph sourced from Wikimedia Commons with attribution (CC BY-SA 4.0). Sourced to represent the craft tradition; not claimed to depict the demo artisan.
+                </p>
 
                 <div className="space-y-2.5">
                   <div className="flex items-center justify-between">
@@ -127,14 +131,14 @@ export default function Home() {
                       <span className="text-[10px] text-emerald-800 bg-emerald-100 font-bold px-1.5 py-0.5 rounded border border-emerald-300">HIGH Evidence</span>
                     </div>
                     <div className="text-stone-600">
-                      Based on 8 comparable market listings (Amazon, Flipkart, ONDC). Market median: ₹3,775.
+                      Benchmark listing analysis (Amazon, Flipkart, ONDC). Market median: ₹3,775 (Simulated Market Data — SIH Demo Mode).
                     </div>
                   </div>
 
                   <div className="pt-2 border-t border-stone-100 flex items-center justify-between text-xs">
                     <div>
                       <span className="text-stone-500 block text-[11px]">Recommended Market Range:</span>
-                      <span className="text-base font-bold text-stone-900">₹3,600 – ₹4,100</span>
+                      <span className="text-base font-bold text-stone-900 font-mono">₹3,600 – ₹4,100</span>
                     </div>
                     <Link
                       href="/heritage/prod-dokra-01"
@@ -150,7 +154,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 2. THE PROBLEM SECTION */}
+      {/* 2. THE PROBLEM SECTION (Phase 2 Cleaned Claims) */}
       <section className="py-16 bg-white border-b border-[#E7E0D3]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-3">
@@ -161,7 +165,7 @@ export default function Home() {
               Why Indigenous Crafts are Excluded from Digital Commerce
             </h3>
             <p className="text-stone-600 text-sm sm:text-base leading-relaxed">
-              India has over 7 million traditional artisans, yet less than 2% directly access digital commerce channels due to technological and linguistic barriers.
+              Millions of traditional artisans remain underserved by digital commerce due to technological and linguistic barriers.
             </p>
           </div>
 
@@ -183,10 +187,10 @@ export default function Home() {
                 2
               </div>
               <h4 className="text-base font-bold text-stone-900 font-serif">
-                Cultural Knowledge Extinction
+                Oral Knowledge Disappearance
               </h4>
               <p className="text-xs text-stone-600 leading-relaxed">
-                Traditional recipes, organic dye processes, and sacred motifs are disappearing without structured digital archiving as older master ustads pass away.
+                Traditional recipes, organic dye processes, and sacred motifs risk disappearing without structured digital archiving as older master ustads pass down memory only verbally.
               </p>
             </div>
 
@@ -195,17 +199,17 @@ export default function Home() {
                 3
               </div>
               <h4 className="text-base font-bold text-stone-900 font-serif">
-                Opaque Middleman Pricing
+                Opaque Price Discovery
               </h4>
               <p className="text-xs text-stone-600 leading-relaxed">
-                Without transparent labor hour standards and raw material formulas, artisans receive fractions of real retail value while intermediaries capture 70%+ margins.
+                Without transparent market price benchmarks comparing genuinely similar handmade listings, artisans lack negotiation power while intermediaries capture disproportionate margins.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 3. HOW KARIGARSETU WORKS (5-STEP VISUAL WORKFLOW) */}
+      {/* 3. HOW KARIGARSETU WORKS (Photo + Voice Workflow) */}
       <section className="py-20 bg-[#FAF7F2] border-b border-[#E7E0D3]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-3">
@@ -216,7 +220,7 @@ export default function Home() {
               How KarigarSetu Works
             </h3>
             <p className="text-stone-600 text-sm sm:text-base">
-              The Photo + Voice → AI → Heritage → Approval workflow makes onboarding accessible in under 90 seconds.
+              The Photo + Voice → AI → Market Discovery → Approval workflow makes onboarding accessible in under 90 seconds.
             </p>
           </div>
 
@@ -241,7 +245,7 @@ export default function Home() {
               <div className="text-xs font-bold uppercase tracking-wider text-[#C2410C]">Step 2</div>
               <h4 className="text-base font-bold text-stone-900 font-serif">2. VOICE</h4>
               <p className="text-xs text-stone-600 leading-relaxed">
-                Artisan speaks naturally in Hindi, Maithili, Odia, Gujarati, or any native Indian language.
+                Artisan speaks naturally in Hindi or their regional language, describing materials and technique.
               </p>
             </div>
 
@@ -253,7 +257,7 @@ export default function Home() {
               <div className="text-xs font-bold uppercase tracking-wider text-[#C2410C]">Step 3</div>
               <h4 className="text-base font-bold text-stone-900 font-serif">3. MULTIMODAL AI</h4>
               <p className="text-xs text-stone-600 leading-relaxed">
-                Multimodal AI analyzes visual contours + speech transcript to extract structured craft metadata.
+                Multimodal AI analyzes visual features + speech transcript to extract structured craft metadata.
               </p>
             </div>
 
@@ -265,7 +269,7 @@ export default function Home() {
               <div className="text-xs font-bold uppercase tracking-wider text-[#C2410C]">Step 4</div>
               <h4 className="text-base font-bold text-stone-900 font-serif">4. ARTISAN APPROVAL</h4>
               <p className="text-xs text-stone-600 leading-relaxed">
-                Artisan reviews & approves or edits the listing and fair price. Never auto-published without consent.
+                Artisan reviews & approves or edits the listing and sets final price. Never published without consent.
               </p>
             </div>
 
@@ -277,14 +281,14 @@ export default function Home() {
               <div className="text-xs font-bold uppercase tracking-wider text-[#C2410C]">Step 5</div>
               <h4 className="text-base font-bold text-stone-900 font-serif">5. HERITAGE & ONDC</h4>
               <p className="text-xs text-stone-600 leading-relaxed">
-                Registers a Digital Heritage Passport in the Vault & generates an ONDC/GeM integration packet.
+                Registers a Digital Heritage Passport in the Vault & prepares an ONDC integration-ready catalogue record (Beckn-compatible).
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 4. LIVE INTERACTIVE 90-SECOND DEMO SECTION */}
+      {/* 4. LIVE INTERACTIVE 90-SECOND DEMO SECTION (Phase 30 8-Step Simulation) */}
       <section className="py-20 bg-white border-b border-[#E7E0D3]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <InteractiveDemo />
@@ -325,7 +329,7 @@ export default function Home() {
                 </li>
                 <li className="flex items-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Pre-generation inspection of acoustic terms</span>
+                  <span>Pre-generation inspection of extracted acoustic terms</span>
                 </li>
               </ul>
             </div>
@@ -362,12 +366,12 @@ export default function Home() {
                 Heritage: Provenance Integrity
               </h4>
               <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
-                National Living Heritage Vault preserving oral stories, techniques, and materials. Explicit verification states prevent fabricated GI certifications.
+                KarigarSetu Living Heritage Vault preserving oral stories, techniques, and materials. Explicit verification states prevent fabricated GI certifications.
               </p>
               <ul className="text-xs text-stone-700 space-y-2 pt-2 border-t border-stone-100">
                 <li className="flex items-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Strict 6-state verification & provenance matrix</span>
+                  <span>8 explicit verification & provenance truth states</span>
                 </li>
                 <li className="flex items-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
@@ -386,51 +390,233 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 7. IMPACT & METRICS SECTION */}
-      <section className="py-16 bg-[#FFF7ED]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 text-center">
-          <div className="max-w-2xl mx-auto space-y-2">
+      {/* 7. PHASE 31: MEASURABLE IMPACT SECTION (Economic, Social, Heritage) */}
+      <section className="py-20 bg-[#FAF7F2] border-b border-[#E7E0D3]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+          <div className="text-center max-w-3xl mx-auto space-y-3">
             <h2 className="text-xs font-bold tracking-widest uppercase text-[#C2410C]">
               Measurable Platform Impact
             </h2>
-            <h3 className="text-2xl sm:text-3xl font-extrabold text-stone-900 font-serif">
-              Preserving Indian Craft Memory at National Scale
+            <h3 className="text-3xl sm:text-4xl font-extrabold text-stone-900 font-serif">
+              Three-Dimensional Impact Framework
             </h3>
+            <p className="text-stone-600 text-sm sm:text-base">
+              Addressing economic enablement, social inclusion, and cultural heritage preservation through responsible technology.
+            </p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
-            <div className="bg-white p-6 rounded-2xl craft-border-subtle shadow-xs">
-              <span className="text-3xl sm:text-4xl font-extrabold font-serif text-[#C2410C] block">8</span>
-              <span className="text-xs font-medium text-stone-600 mt-1 block">Living Craft Traditions</span>
-              <span className="text-[11px] text-stone-400">Archived in Vault</span>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Economic Impact */}
+            <div className="bg-white p-6 sm:p-8 rounded-3xl craft-border-subtle shadow-xs space-y-4">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold">
+                <TrendingUp className="w-6 h-6" />
+              </div>
+              <h4 className="text-lg font-bold font-serif text-stone-900">
+                Economic Impact
+              </h4>
+              <ul className="text-xs sm:text-sm text-stone-600 space-y-2.5">
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <span><strong>Increased Digital Discoverability:</strong> Direct cataloguing enables indexing across ONDC buyer apps and digital portals.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <span><strong>Market Access & Visibility:</strong> Structured data formatting removes technical barriers to multi-channel listing.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <span><strong>Market-Informed Price Transparency:</strong> Multi-marketplace comparable analysis prevents distress under-pricing.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <span><strong>Reduced Onboarding Friction:</strong> Turnaround reduced from multiple days via intermediaries to under 90 seconds.</span>
+                </li>
+              </ul>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl craft-border-subtle shadow-xs">
-              <span className="text-3xl sm:text-4xl font-extrabold font-serif text-emerald-700 block">100%</span>
-              <span className="text-xs font-medium text-stone-600 mt-1 block">Artisan Approval Guard</span>
-              <span className="text-[11px] text-stone-400">Zero unconsented posts</span>
+            {/* Social Impact */}
+            <div className="bg-white p-6 sm:p-8 rounded-3xl craft-border-subtle shadow-xs space-y-4">
+              <div className="w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center text-amber-800 font-bold">
+                <Users className="w-6 h-6" />
+              </div>
+              <h4 className="text-lg font-bold font-serif text-stone-900">
+                Social Impact
+              </h4>
+              <ul className="text-xs sm:text-sm text-stone-600 space-y-2.5">
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+                  <span><strong>Lower Literacy Barrier:</strong> Voice-first interaction allows non-literate artisans to catalogue products autonomously.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+                  <span><strong>Local-Language Interaction:</strong> Native Hindi, Maithili, Odia, Gujarati, and regional speech processing.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+                  <span><strong>Support for Rural & Women Artisans:</strong> Enables home-based creators to participate directly in national trade networks.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+                  <span><strong>Direct Digital Participation:</strong> Eliminates middleman text transcription dependency.</span>
+                </li>
+              </ul>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl craft-border-subtle shadow-xs">
-              <span className="text-3xl sm:text-4xl font-extrabold font-serif text-indigo-700 block">6</span>
-              <span className="text-xs font-medium text-stone-600 mt-1 block">Provenance Truth States</span>
-              <span className="text-[11px] text-stone-400">Anti-fabrication matrix</span>
-            </div>
-
-            <div className="bg-white p-6 rounded-2xl craft-border-subtle shadow-xs">
-              <span className="text-3xl sm:text-4xl font-extrabold font-serif text-amber-700 block">&lt; 90s</span>
-              <span className="text-xs font-medium text-stone-600 mt-1 block">Onboarding Turnaround</span>
-              <span className="text-[11px] text-stone-400">Photo + voice to listing</span>
+            {/* Heritage Impact */}
+            <div className="bg-white p-6 sm:p-8 rounded-3xl craft-border-subtle shadow-xs space-y-4">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-100 flex items-center justify-center text-[#1E3A5F] font-bold">
+                <Award className="w-6 h-6" />
+              </div>
+              <h4 className="text-lg font-bold font-serif text-stone-900">
+                Heritage Impact
+              </h4>
+              <ul className="text-xs sm:text-sm text-stone-600 space-y-2.5">
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-indigo-700 shrink-0 mt-0.5" />
+                  <span><strong>Living Heritage Documentation:</strong> Archiving oral techniques, natural dye chemistry, and clay formulations.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-indigo-700 shrink-0 mt-0.5" />
+                  <span><strong>Artisan Story Archival:</strong> Preserving 5th-generation lineage narratives in the master artisan&apos;s own voice.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-indigo-700 shrink-0 mt-0.5" />
+                  <span><strong>Traditional Motifs & Materials:</strong> Systematic tagging of indigenous motifs and non-ferrous metallurgical methods.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-indigo-700 shrink-0 mt-0.5" />
+                  <span><strong>Intergenerational Knowledge Safeguarding:</strong> Digital museum records accessible for research and provenance verification.</span>
+                </li>
+              </ul>
             </div>
           </div>
+        </div>
+      </section>
 
-          <div className="pt-4">
+      {/* 8. PHASE 32: EVIDENCE & AUTHORITATIVE SOURCES SECTION */}
+      <section className="py-20 bg-white border-b border-[#E7E0D3]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+          <div className="text-center max-w-3xl mx-auto space-y-3">
+            <h2 className="text-xs font-bold tracking-widest uppercase text-[#C2410C]">
+              Institutional Integrity
+            </h2>
+            <h3 className="text-3xl sm:text-4xl font-extrabold text-stone-900 font-serif">
+              Authoritative Evidence & Sources
+            </h3>
+            <p className="text-stone-600 text-sm sm:text-base">
+              Distinguishing source-derived institutional facts from KarigarSetu demo metrics and algorithmic price estimates.
+            </p>
+          </div>
+
+          {/* Evidence Table */}
+          <div className="overflow-x-auto bg-[#FAF7F2] rounded-3xl p-6 border border-stone-200 shadow-xs">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="border-b border-stone-300 text-stone-700 font-bold uppercase tracking-wider text-[11px]">
+                  <th className="py-3 px-4">Claim / Scope</th>
+                  <th className="py-3 px-4">Authoritative Source</th>
+                  <th className="py-3 px-4">Reference Date</th>
+                  <th className="py-3 px-4">Type</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-stone-200 text-stone-800">
+                <tr>
+                  <td className="py-3.5 px-4 font-semibold">
+                    Geographical Indications of Goods Registry (Bastar Dhokra, Jaipur Blue Pottery, Madhubani, Channapatna)
+                  </td>
+                  <td className="py-3.5 px-4 text-stone-600">
+                    Geographical Indications Registry, Intellectual Property India, Ministry of Commerce & Industry
+                  </td>
+                  <td className="py-3.5 px-4 font-mono text-stone-500">Official GI Journal</td>
+                  <td className="py-3.5 px-4">
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 font-bold text-[10px]">
+                      Source-Derived Fact
+                    </span>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td className="py-3.5 px-4 font-semibold">
+                    Digital Commerce Protocol & Direct Artisan Onboarding Architecture
+                  </td>
+                  <td className="py-3.5 px-4 text-stone-600">
+                    Open Network for Digital Commerce (ONDC) Open Protocol Documentation & Seller Enablement Guidelines
+                  </td>
+                  <td className="py-3.5 px-4 font-mono text-stone-500">2023–2026</td>
+                  <td className="py-3.5 px-4">
+                    <span className="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-900 font-bold text-[10px]">
+                      Protocol Standard
+                    </span>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td className="py-3.5 px-4 font-semibold">
+                    Traditional Craft Documentation & Intangible Cultural Heritage Guidelines
+                  </td>
+                  <td className="py-3.5 px-4 text-stone-600">
+                    Ministry of Culture, Government of India & UNESCO Intangible Cultural Heritage Convention
+                  </td>
+                  <td className="py-3.5 px-4 font-mono text-stone-500">National Archive</td>
+                  <td className="py-3.5 px-4">
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 font-bold text-[10px]">
+                      Source-Derived Fact
+                    </span>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td className="py-3.5 px-4 font-semibold">
+                    8 Regional Living Craft Pilot Dataset (Bastar, Jaipur, Madhubani, etc.)
+                  </td>
+                  <td className="py-3.5 px-4 text-stone-600">
+                    KarigarSetu SIH26090 Seed Architecture (Deterministic local repository)
+                  </td>
+                  <td className="py-3.5 px-4 font-mono text-stone-500">SIH 2026</td>
+                  <td className="py-3.5 px-4">
+                    <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 font-bold text-[10px]">
+                      KarigarSetu Demo Metric
+                    </span>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td className="py-3.5 px-4 font-semibold">
+                    Market Price Discovery Range Analysis (Simulated benchmark listings — SIH Demo Mode)
+                  </td>
+                  <td className="py-3.5 px-4 text-stone-600">
+                    MarketPriceProvider Aggregation Service with Comparability Scoring (Final price set by artisan)
+                  </td>
+                  <td className="py-3.5 px-4 font-mono text-stone-500">Benchmark snapshot</td>
+                  <td className="py-3.5 px-4">
+                    <span className="px-2 py-0.5 rounded-full bg-orange-100 text-orange-900 font-bold text-[10px]">
+                      Benchmark Estimate
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      {/* 9. BOTTOM CALL TO ACTION */}
+      <section className="py-16 bg-[#FFF7ED]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 text-center">
+          <h3 className="text-2xl sm:text-3xl font-extrabold text-stone-900 font-serif">
+            Preserve Cultural Memory. Discover Fair Market Value.
+          </h3>
+          <p className="text-stone-600 text-sm max-w-xl mx-auto">
+            Experience how voice-first AI and provenance verification empower traditional master artisans without middlemen.
+          </p>
+
+          <div className="pt-2">
             <Link
               href="/products/new"
               className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-[#C2410C] hover:bg-[#9A3412] text-white text-base font-bold shadow-md transition"
             >
               <Sparkles className="w-5 h-5" />
-              <span>Begin Artisan Onboarding Flow</span>
+              <span>Launch AI Onboarding Studio</span>
               <ArrowRight className="w-5 h-5" />
             </Link>
           </div>

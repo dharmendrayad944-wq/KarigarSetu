@@ -37,7 +37,7 @@ export default function RegisterPage() {
           language: formData.preferredLanguage,
         })
       );
-      router.push("/dashboard");
+      router.push("/onboarding");
     }, 600);
   };
 

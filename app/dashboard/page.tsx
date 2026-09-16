@@ -1,72 +1,70 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useLanguage } from "@/components/providers/LanguageContext";
 import { ProductRepository } from "@/lib/db/repository";
-import { Product } from "@/lib/db/schema";
+import { DEMO_PRODUCTS } from "@/lib/data/demo-products";
+import { Product, NetworkEvent } from "@/lib/db/schema";
+import { INITIAL_NETWORK_EVENTS } from "@/lib/db/seed-data";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { ProductStatusBadge, GICandidacyBadge, ProvenanceBadge } from "@/components/ui/Badge";
+import { ProductStatusBadge, GICandidacyBadge } from "@/components/ui/Badge";
+import { ImageFallback } from "@/components/ui/ImageFallback";
 import {
   Package,
-  Sparkles,
   RotateCcw,
   PlusCircle,
   ArrowUpRight,
-  ShieldCheck,
   Award,
-  BookOpen,
-  MapPin,
   Clock,
-  ExternalLink,
   MessageSquare,
   IndianRupee,
+  TrendingUp,
 } from "lucide-react";
 
 export default function DashboardPage() {
   const { t, language } = useLanguage();
-  const [products, setProducts] = useState<Product[]>([]);
+  // Deterministic SSR & initial client render
+  const [products, setProducts] = useState<Product[]>(DEMO_PRODUCTS);
+  const [networkEvents, setNetworkEvents] = useState<NetworkEvent[]>(() => INITIAL_NETWORK_EVENTS);
   const [artisanName, setArtisanName] = useState("Shanti Devi");
 
-  const loadData = () => {
-    const list = ProductRepository.getProducts();
-    setProducts(list);
-
-    if (typeof window !== "undefined") {
+  // Load client persisted data after mount to prevent hydration mismatch
+  useEffect(() => {
+    setProducts(ProductRepository.getProducts());
+    setNetworkEvents(ProductRepository.getNetworkEvents());
+    try {
       const stored = localStorage.getItem("karigar_active_artisan");
       if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          if (parsed.name) setArtisanName(parsed.name);
-        } catch (e) {
-          console.error(e);
-        }
+        const parsed = JSON.parse(stored);
+        if (parsed.name) setArtisanName(parsed.name);
       }
+    } catch (e) {
+      console.error(e);
     }
-  };
-
-  useEffect(() => {
-    loadData();
   }, []);
 
   const handleResetDemoData = () => {
     if (confirm("Reset demo catalog to initial seed items?")) {
       const reset = ProductRepository.resetToSeed();
       setProducts(reset);
+      setNetworkEvents(ProductRepository.getNetworkEvents());
     }
   };
 
-  // Section 15 Required Metrics
+  // Phase 21 Derived Operational Metrics
   const productsOnboarded = products.length;
   const pendingApprovals = products.filter(
     (p) => p.status === "artisan_review" || p.status === "ai_generated" || p.status === "draft"
   ).length;
-  const externalInquiries = 14; // ONDC / GeM network discovery inquiries
+  // Derived network inquiries from deterministic event records (P0-3 Option A)
+  const externalInquiries = networkEvents.filter(
+    (event) => event.event_type === "inquiry"
+  ).length;
   const catalogueValue = products.reduce((acc, p) => acc + (p.final_price || p.suggested_min_price || 0), 0);
 
-  // Heritage Impact Metrics
+  // Living Heritage Preservation Metrics
   const heritageRecordsCount = products.filter((p) => p.heritage_record || p.heritage_profile).length;
   const craftStoriesCount = products.filter((p) => p.artisan_story || p.heritage_record?.artisan_story).length;
   const techniquesCount = products.filter(
@@ -156,20 +154,22 @@ export default function DashboardPage() {
             </div>
           </Card>
 
-          {/* Metric 4: External Market Inquiries */}
+          {/* Metric 4: External Market Inquiries (Derived from Network Event Model) */}
           <Card className="flex items-center gap-4 bg-white">
             <div className="w-12 h-12 rounded-2xl bg-indigo-100 flex items-center justify-center text-[#1E3A5F] shrink-0">
               <MessageSquare className="w-6 h-6" />
             </div>
             <div>
-              <span className="text-xs font-medium text-stone-500 block">Market Inquiries</span>
+              <span className="text-xs font-medium text-stone-500 block">Network Inquiries</span>
               <span className="text-2xl font-bold text-stone-900 font-serif">{externalInquiries}</span>
-              <span className="text-[11px] text-stone-400 block mt-0.5">ONDC / GeM readiness</span>
+              <span className="text-[11px] text-amber-700 font-semibold block mt-0.5">
+                Simulated Demo Data
+              </span>
             </div>
           </Card>
         </div>
 
-        {/* Section 15: Heritage Impact Section */}
+        {/* Living Heritage Preservation Metrics */}
         <div className="bg-gradient-to-r from-stone-900 via-[#1E3A5F] to-stone-900 rounded-3xl p-6 sm:p-8 text-white space-y-6 shadow-md">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
             <div>
@@ -186,7 +186,7 @@ export default function DashboardPage() {
               href="/vault"
               className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold backdrop-blur-xs transition self-start sm:self-auto"
             >
-              <span>Explore National Heritage Vault</span>
+              <span>Explore KarigarSetu Living Heritage Vault</span>
               <ArrowUpRight className="w-4 h-4" />
             </Link>
           </div>
@@ -261,9 +261,11 @@ export default function DashboardPage() {
                 >
                   {/* Image & Badges */}
                   <div className="relative h-52 w-full bg-stone-100">
-                    <Image
+                    <ImageFallback
                       src={product.featured_image_url}
                       alt={product.title}
+                      craft={product.craft_name}
+                      region={`${product.district}, ${product.state}`}
                       fill
                       className="object-cover"
                       sizes="(max-width: 768px) 100vw, 33vw"
@@ -298,7 +300,10 @@ export default function DashboardPage() {
 
                     <div className="pt-3 border-t border-stone-100 space-y-3">
                       <div className="flex items-baseline justify-between text-xs">
-                        <span className="text-stone-500">Fair Price Baseline:</span>
+                        <span className="text-stone-500 flex items-center gap-1">
+                          <TrendingUp className="w-3 h-3 text-[#C2410C]" />
+                          Market Price Range:
+                        </span>
                         <span className="text-sm font-bold text-stone-900">
                           ₹{product.suggested_min_price.toLocaleString("en-IN")} – ₹{product.suggested_max_price.toLocaleString("en-IN")}
                         </span>

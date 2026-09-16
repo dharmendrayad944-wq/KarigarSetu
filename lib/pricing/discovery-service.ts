@@ -9,6 +9,7 @@ import { MarketPriceProvider, DiscoveryPipelineOptions } from "./types";
 import { AmazonProvider } from "./providers/amazon-provider";
 import { FlipkartProvider } from "./providers/flipkart-provider";
 import { ONDCProvider } from "./providers/ondc-provider";
+import { OtherApprovedProvider } from "./providers/other-approved-provider";
 import { DemoMarketProvider } from "./providers/demo-market-provider";
 import { ComparabilityEngine } from "./comparability-engine";
 import { MarketAnalysisEngine } from "./market-analysis-engine";
@@ -23,6 +24,7 @@ export class MarketPriceDiscoveryService {
       new AmazonProvider(),
       new FlipkartProvider(),
       new ONDCProvider(),
+      new OtherApprovedProvider(),
     ];
   }
 

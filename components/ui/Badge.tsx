@@ -5,6 +5,7 @@ import { useLanguage } from "@/components/providers/LanguageContext";
 
 export type ProvenanceBadgeType =
   | "Artisan Provided"
+  | "Artisan Attested"
   | "AI Generated"
   | "AI Suggested"
   | "Verified Source"
@@ -35,6 +36,17 @@ export const ProvenanceBadge: React.FC<ProvenanceBadgeProps> = ({ label, classNa
         </span>
       );
 
+    case "Artisan Attested":
+      return (
+        <span
+          className={`inline-flex items-center gap-1 rounded-full font-semibold bg-purple-50 text-purple-900 border border-purple-300 shadow-2xs ${sizeClasses} ${className}`}
+          title="This information comes from the artisan's own oral knowledge."
+        >
+          <User className={`${isSm ? "w-3 h-3" : "w-3.5 h-3.5"} text-purple-700`} />
+          <span>Artisan Attested</span>
+        </span>
+      );
+
     case "AI Generated":
     case "AI Suggested":
       return (
@@ -59,24 +71,37 @@ export const ProvenanceBadge: React.FC<ProvenanceBadgeProps> = ({ label, classNa
       );
 
     case "GI Registered Craft":
+    case "GI-Registered Craft":
       return (
         <span
           className={`inline-flex items-center gap-1 rounded-full font-bold bg-emerald-700 text-white shadow-2xs ${sizeClasses} ${className}`}
           title="Officially recognized craft cluster with Geographical Indication registration"
         >
           <ShieldCheck className={`${isSm ? "w-3 h-3" : "w-3.5 h-3.5"} text-emerald-200`} />
-          <span>GI Registered Craft</span>
+          <span>GI-Registered Craft</span>
         </span>
       );
 
+    case "GI Information Available":
+      return (
+        <span
+          className={`inline-flex items-center gap-1 rounded-full font-semibold bg-sky-50 text-sky-900 border border-sky-300 shadow-2xs ${sizeClasses} ${className}`}
+          title="Geographical and historical lineage documented from official craft gazetteers"
+        >
+          <FileText className={`${isSm ? "w-3 h-3" : "w-3.5 h-3.5"} text-sky-700`} />
+          <span>GI Information Available</span>
+        </span>
+      );
+
+    case "GI Verification Pending":
     case "GI Candidate — Verification Required":
       return (
         <span
           className={`inline-flex items-center gap-1 rounded-full font-semibold bg-amber-100 text-amber-950 border border-amber-400 shadow-2xs ${sizeClasses} ${className}`}
-          title="Craft community has unique geo-heritage but requires formal GI documentation"
+          title="Craft community matches geo-cluster; artisan-level GI certification requires verification"
         >
           <AlertTriangle className={`${isSm ? "w-3 h-3" : "w-3.5 h-3.5"} text-amber-800`} />
-          <span>GI Candidate — Verification Required</span>
+          <span>GI Verification Pending</span>
         </span>
       );
 
@@ -112,6 +137,15 @@ export const ProvenanceBadge: React.FC<ProvenanceBadgeProps> = ({ label, classNa
       );
   }
 };
+
+export const AIReviewDisclaimer: React.FC<{ className?: string }> = ({ className = "" }) => (
+  <div className={`p-3 bg-amber-50/80 border border-amber-200 rounded-xl text-xs text-amber-900 flex items-start gap-2 ${className}`}>
+    <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+    <span>
+      <strong>AI Transparency:</strong> AI suggestions are reviewed by the artisan. Cultural claims are not treated as verified without source evidence.
+    </span>
+  </div>
+);
 
 // Backwards-compatible SourceTypeBadge
 export const SourceTypeBadge: React.FC<{ sourceType: SourceType | string; className?: string }> = ({
@@ -184,16 +218,16 @@ export const GICandidacyBadge: React.FC<GICandidacyBadgeProps> = ({
   className = "",
 }) => {
   if (status === "registered_verified" || status === "gi_registered") {
-    const refText = demoReference
-      ? `Demo Ref: ${demoReference}`
-      : registryNumber
-      ? `Reg: ${registryNumber}`
-      : "GI Registered Craft";
+    const refText = registryNumber
+      ? `GI Registration Verified`
+      : demoReference && !demoReference.includes("#")
+      ? demoReference
+      : "GI-Registered Craft";
 
     return (
       <span
         className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-700 text-white shadow-2xs ${className}`}
-        title="GI Tagged Handicraft"
+        title="Officially recognized Geographical Indication craft"
       >
         <ShieldCheck className="w-3.5 h-3.5 text-emerald-200" />
         <span>{refText}</span>
@@ -205,10 +239,10 @@ export const GICandidacyBadge: React.FC<GICandidacyBadgeProps> = ({
     return (
       <span
         className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-950 border border-amber-300 shadow-2xs ${className}`}
-        title="Candidate craft community requiring formal GI registration documentation"
+        title="Candidate craft community; artisan GI verification pending"
       >
         <AlertTriangle className="w-3.5 h-3.5 text-amber-700" />
-        <span>GI Candidate — Verification Required</span>
+        <span>GI Verification Pending</span>
       </span>
     );
   }
@@ -219,7 +253,7 @@ export const GICandidacyBadge: React.FC<GICandidacyBadgeProps> = ({
         className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-800 border border-blue-200 ${className}`}
       >
         <FileText className="w-3.5 h-3.5 text-blue-600" />
-        <span>GI Application Pending</span>
+        <span>GI Information Available</span>
       </span>
     );
   }

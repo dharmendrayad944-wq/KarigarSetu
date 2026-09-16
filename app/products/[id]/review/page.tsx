@@ -9,13 +9,16 @@ import { useLanguage } from "@/components/providers/LanguageContext";
 import { ProductRepository } from "@/lib/db/repository";
 import { Product, HeritageClaim, PricingBreakdown, AIUnderstanding, Dimensions, CraftComplexity, PriceAnalysis, CostReference, ArtisanPriceDecision } from "@/lib/db/schema";
 import { MarketPriceAnalysisCard } from "@/components/pricing/MarketPriceAnalysisCard";
+import { JudgeTrustPanel } from "@/components/trust/JudgeTrustPanel";
 import { marketPriceDiscoveryService } from "@/lib/pricing/discovery-service";
+import { validateFinalArtisanPrice } from "@/lib/pricing/price-validator";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import {
   ProvenanceBadge,
   ProductStatusBadge,
   GICandidacyBadge,
+  AIReviewDisclaimer,
 } from "@/components/ui/Badge";
 import {
   Sparkles,
@@ -136,7 +139,7 @@ export default function ReviewProductPage({
     setLoading(false);
   }, [id, language]);
 
-  // Recalculate Fair Price Baseline when inputs change
+  // Recalculate cost reference benchmark when inputs change
   const handleRecalculatePricing = (
     matCost: number,
     hrs: number,
@@ -175,15 +178,23 @@ export default function ReviewProductPage({
     setMaterials(materials.filter((m) => m !== item));
   };
 
-  // Toggle Claim Verification Status: Artisan clicks to verify claim
+  // Toggle Claim Verification Status: Artisan clicks to attest oral lineage claim
   const handleToggleClaimStatus = (claimId: string | undefined) => {
     if (!claimId) return;
     setClaims((prev) =>
       prev.map((c) => {
         if (c.id === claimId) {
-          const nextStatus = c.verification_status === "verified" ? "requires_verification" : "verified";
-          const nextLabel = nextStatus === "verified" ? "Verified Source" : "Requires Verification";
-          return { ...c, verification_status: nextStatus, provenance_label: nextLabel };
+          if (c.source_type === "artisan") {
+            const nextAttested = !c.is_artisan_attested;
+            return {
+              ...c,
+              is_artisan_attested: nextAttested,
+              provenance_status: nextAttested ? ("ARTISAN_ATTESTED" as const) : ("ARTISAN_PROVIDED" as const),
+              provenance_label: nextAttested ? "Artisan Attested" : "Artisan Provided",
+              verification_status: nextAttested ? ("verified" as const) : ("requires_verification" as const),
+            };
+          }
+          return c;
         }
         return c;
       })
@@ -196,9 +207,11 @@ export default function ReviewProductPage({
   };
 
   // Save Draft (Artisan Edited)
+  // Save Draft (Artisan Edited)
   const handleSaveDraft = () => {
     if (!product) return;
     setSaving(true);
+    const validFinalPrice = Number(finalPrice) > 0 ? Number(finalPrice) : (product.final_price || product.suggested_min_price || 100);
     const updated: Product = {
       ...product,
       title,
@@ -209,15 +222,15 @@ export default function ReviewProductPage({
       district,
       materials,
       dimensions,
-      suggested_min_price: minPrice,
-      suggested_max_price: maxPrice,
-      final_price: finalPrice,
+      suggested_min_price: Math.max(1, Number(minPrice) || 1),
+      suggested_max_price: Math.max(Number(minPrice) || 1, Number(maxPrice) || 1),
+      final_price: validFinalPrice,
       price_analysis: priceAnalysis,
       artisan_price_decision: {
         product_id: product.id,
         recommended_min: minPrice,
         recommended_max: maxPrice,
-        final_price: finalPrice,
+        final_price: validFinalPrice,
         chosen_by: priceDecisionMode,
         pricing_sources: priceAnalysis?.comparables.map((c) => c.marketplace) || ["Amazon", "Flipkart", "ONDC"],
       },
@@ -247,17 +260,33 @@ export default function ReviewProductPage({
       updated_at: new Date().toISOString(),
     };
 
-    ProductRepository.saveProduct(updated);
-    setProduct(updated);
-    setTimeout(() => {
-      setSaving(false);
-    }, 600);
+    try {
+      ProductRepository.saveProduct(updated);
+      setProduct(updated);
+    } catch (err: any) {
+      console.error("Draft save failed:", err);
+      alert(err.message || "Failed to save draft changes.");
+    } finally {
+      setTimeout(() => {
+        setSaving(false);
+      }, 600);
+    }
   };
+
+  const priceValidation = validateFinalArtisanPrice(finalPrice);
 
   // Approve & Save to Catalogue
   const handleApproveAndPublish = () => {
     if (!product) return;
     setApproving(true);
+
+    if (!priceValidation.isValid || !priceValidation.sanitizedValue) {
+      setApproving(false);
+      alert(priceValidation.error || "Please specify a valid final selling price greater than ₹0 before approving.");
+      return;
+    }
+
+    const validFinalPrice = priceValidation.sanitizedValue;
 
     const updated: Product = {
       ...product,
@@ -269,15 +298,15 @@ export default function ReviewProductPage({
       district,
       materials,
       dimensions,
-      suggested_min_price: minPrice,
-      suggested_max_price: maxPrice,
-      final_price: finalPrice,
+      suggested_min_price: Math.max(1, Number(minPrice) || 1),
+      suggested_max_price: Math.max(Number(minPrice) || 1, Number(maxPrice) || 1),
+      final_price: validFinalPrice,
       price_analysis: priceAnalysis,
       artisan_price_decision: {
         product_id: product.id,
         recommended_min: minPrice,
         recommended_max: maxPrice,
-        final_price: finalPrice,
+        final_price: validFinalPrice,
         chosen_by: priceDecisionMode,
         pricing_sources: priceAnalysis?.comparables.map((c) => c.marketplace) || ["Amazon", "Flipkart", "ONDC"],
       },
@@ -307,22 +336,28 @@ export default function ReviewProductPage({
       updated_at: new Date().toISOString(),
     };
 
-    ProductRepository.saveProduct(updated);
-    ProductRepository.publishProduct(product.id);
-
     try {
-      confetti({
-        particleCount: 120,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ["#C2410C", "#D97706", "#15803D", "#1E3A5F"],
-      });
-    } catch (e) {}
+      ProductRepository.saveProduct(updated);
+      ProductRepository.publishProduct(product.id);
 
-    setTimeout(() => {
+      try {
+        confetti({
+          particleCount: 120,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ["#C2410C", "#D97706", "#15803D", "#1E3A5F"],
+        });
+      } catch (e) {}
+
+      setTimeout(() => {
+        setApproving(false);
+        setShowSuccessModal(true);
+      }, 400);
+    } catch (err: any) {
       setApproving(false);
-      setShowSuccessModal(true);
-    }, 400);
+      console.error("Approve and publish failed:", err);
+      alert(err.message || "Failed to publish listing. Please check all fields.");
+    }
   };
 
   // Download ONDC / Marketplace JSON Packet
@@ -436,6 +471,8 @@ export default function ReviewProductPage({
             <span className="text-stone-300">→</span>
             <span className="text-stone-500">5. Published to Catalogue & Vault</span>
           </div>
+
+          <AIReviewDisclaimer />
         </div>
 
         {/* What the AI Understood Inspection Panel */}
@@ -510,6 +547,9 @@ export default function ReviewProductPage({
           </Card>
         )}
 
+        {/* Judge Trust Panel (Section 6 & 10) */}
+        <JudgeTrustPanel craftName={craftName} comparableCount={priceAnalysis?.comparable_count || 4} />
+
         {/* Two-Column Workspace Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left Column: Product Photo & Market Price Analysis (Lg: 5 cols) */}
@@ -523,6 +563,7 @@ export default function ReviewProductPage({
                   className="object-cover"
                   sizes="(max-width: 1024px) 100vw, 40vw"
                   priority
+                  loading="eager"
                 />
                 <div className="absolute top-4 left-4">
                   <GICandidacyBadge
@@ -533,6 +574,16 @@ export default function ReviewProductPage({
                 <div className="absolute bottom-3 right-3 bg-black/80 backdrop-blur-xs text-white text-xs px-3 py-1 rounded-md font-medium">
                   {district}, {state}
                 </div>
+              </div>
+
+              {/* Image Attribution and Tradition Representation Disclaimer (Item 2) */}
+              <div className="px-4 py-2.5 bg-stone-50 border-t border-stone-100 text-[11px] text-stone-600 space-y-1">
+                <p>
+                  <strong>Image Source:</strong> Real craft photograph sourced from Wikimedia Commons with attribution ({product.image_attribution?.license_type || "CC BY-SA 4.0"}).
+                </p>
+                <p className="text-[10px] text-stone-500 italic">
+                  These images represent the craft tradition and are not claimed to be photographs of the demo artisan.
+                </p>
               </div>
 
               {/* Provenance Badge Legend */}
@@ -546,6 +597,7 @@ export default function ReviewProductPage({
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <ProvenanceBadge label="Artisan Provided" size="sm" />
+                  <ProvenanceBadge label="Artisan Attested" size="sm" />
                   <ProvenanceBadge label="AI Generated" size="sm" />
                   <ProvenanceBadge label="Verified Source" size="sm" />
                   <ProvenanceBadge label="Requires Verification" size="sm" />
@@ -559,6 +611,8 @@ export default function ReviewProductPage({
             {/* Market-Based Price Analysis Card (Section 20 & 8) */}
             <MarketPriceAnalysisCard
               priceAnalysis={priceAnalysis}
+              suggestedMinPrice={minPrice}
+              suggestedMaxPrice={maxPrice}
               finalPrice={finalPrice}
               onFinalPriceChange={handleFinalPriceChange}
               costReference={costReference}
@@ -820,7 +874,6 @@ export default function ReviewProductPage({
                 />
               </div>
 
-              {/* Heritage Claims Verification Matrix */}
               <div className="space-y-3 pt-3 border-t border-stone-100">
                 <div className="flex items-center justify-between">
                   <div>
@@ -829,7 +882,7 @@ export default function ReviewProductPage({
                       <span>{t.provenanceTitle}</span>
                     </span>
                     <p className="text-[11px] text-stone-500 mt-0.5">
-                      Review each claim below before approval. Click to verify or flag claims.
+                      Artisan oral history: click to attest. AI/official claims cannot be self-verified — source metadata required.
                     </p>
                   </div>
                   <span className="text-[11px] font-bold text-stone-600 bg-stone-100 px-2 py-0.5 rounded">
@@ -857,24 +910,41 @@ export default function ReviewProductPage({
                         )}
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={() => handleToggleClaimStatus(claim.id)}
-                        className={`text-xs px-3 py-1.5 rounded-lg font-bold transition cursor-pointer shrink-0 shadow-2xs ${
-                          claim.verification_status === "verified"
-                            ? "bg-stone-200 hover:bg-stone-300 text-stone-700"
-                            : "bg-emerald-600 hover:bg-emerald-700 text-white"
-                        }`}
-                      >
-                        {claim.verification_status === "verified" ? "Unverify" : "Verify Claim"}
-                      </button>
+                      {/* Context-aware action button — NO self-verification for factual claims */}
+                      {claim.source_type === "artisan" ? (
+                        <button
+                          type="button"
+                          onClick={() => handleToggleClaimStatus(claim.id)}
+                          className={`text-xs px-3 py-1.5 rounded-lg font-bold transition cursor-pointer shrink-0 shadow-2xs ${
+                            claim.is_artisan_attested || claim.provenance_status === "ARTISAN_ATTESTED" || claim.provenance_label === "Artisan Attested"
+                              ? "bg-purple-100 hover:bg-purple-200 text-purple-900 border border-purple-300"
+                              : "bg-[#C2410C] hover:bg-[#9A3412] text-white"
+                          }`}
+                        >
+                          {claim.is_artisan_attested || claim.provenance_status === "ARTISAN_ATTESTED" || claim.provenance_label === "Artisan Attested"
+                            ? "Attested ✓"
+                            : "Attest as Artisan Knowledge"}
+                        </button>
+                      ) : claim.source_type === "official" && claim.verification_status === "verified" ? (
+                        <span className="text-xs px-3 py-1.5 rounded-lg font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0">
+                          Verified by Source ✓
+                        </span>
+                      ) : (
+                        <span className="text-xs px-3 py-1.5 rounded-lg font-bold bg-amber-50 text-amber-800 border border-amber-200 shrink-0">
+                          Awaiting Verification
+                        </span>
+                      )}
                     </div>
                   ))}
                 </div>
               </div>
             </Card>
 
-            {/* Bottom Actions Bar */}
+            {/* Judge Trust & Methodology Panel (Items 6 & 10) */}
+            <JudgeTrustPanel
+              craftName={craftName}
+              comparableCount={product?.price_analysis?.comparable_count || 0}
+            />
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-stone-200">
               <Button
                 variant="outline"
@@ -883,7 +953,7 @@ export default function ReviewProductPage({
                 leftIcon={<FileJson className="w-4 h-4 text-indigo-700" />}
                 className="w-full sm:w-auto"
               >
-                Download ONDC Listing Packet
+                Download ONDC-Ready Integration Packet
               </Button>
 
               <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -891,41 +961,51 @@ export default function ReviewProductPage({
                   variant="outline"
                   onClick={handleSaveDraft}
                   isLoading={saving}
-                  leftIcon={<Save className="w-4 h-4" />}
-                  className="flex-1 sm:flex-initial"
+                               className="flex-1 sm:flex-initial"
                 >
                   Save Draft
                 </Button>
 
-                <Button
-                  variant="primary"
-                  size="lg"
-                  onClick={handleApproveAndPublish}
-                  isLoading={approving}
-                  leftIcon={<CheckCircle2 className="w-5 h-5" />}
-                  className="flex-1 sm:flex-initial font-bold shadow-md hover:shadow-lg"
-                >
-                  Approve & Save to Catalogue
-                </Button>
+                <div className="flex flex-col items-stretch sm:items-end gap-1">
+                  {!priceValidation.isValid && (
+                    <span className="text-[11px] font-semibold text-rose-600 text-right">
+                      {priceValidation.error}
+                    </span>
+                  )}
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    onClick={handleApproveAndPublish}
+                    isLoading={approving}
+                    disabled={!priceValidation.isValid}
+                    leftIcon={<CheckCircle2 className="w-5 h-5" />}
+                    className="font-bold shadow-md hover:shadow-lg disabled:opacity-40 disabled:cursor-not-allowed w-full sm:w-auto"
+                  >
+                    Approve & Publish to Vault
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Success Modal */}
+        {/* Post-Approval Modal Dialog */}
         {showSuccessModal && (
-          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-stone-200 text-center space-y-6">
-              <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto text-emerald-700">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-[#E7E0D3] text-center space-y-5 animate-in fade-in zoom-in-95 duration-200">
+              <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
                 <CheckCircle2 className="w-10 h-10" />
               </div>
 
               <div className="space-y-2">
+                <div className="text-xs font-bold uppercase tracking-wider text-emerald-800">
+                  Sovereign Artisan Approval Confirmed
+                </div>
                 <h3 className="text-2xl font-bold font-serif text-stone-900">
                   Artisan Approved & Published!
                 </h3>
                 <p className="text-sm text-stone-600">
-                  Your handcrafted creation is now registered in the <strong>National Living Heritage Vault</strong> with verified provenance and ready for ONDC / GeM export.
+                  Your handcrafted creation is now registered in the <strong>KarigarSetu Living Heritage Vault</strong> with explicit provenance labels and an ONDC integration-ready catalogue packet.
                 </p>
               </div>
 
@@ -951,7 +1031,7 @@ export default function ReviewProductPage({
                   className="w-full inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#162A45] text-white font-bold text-xs shadow-sm transition cursor-pointer"
                 >
                   <Download className="w-4 h-4" />
-                  <span>Download ONDC Marketplace Packet</span>
+                  <span>Download ONDC-Ready Export Packet</span>
                 </button>
               </div>
             </div>

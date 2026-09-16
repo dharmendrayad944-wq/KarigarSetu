@@ -535,11 +535,66 @@ export const SIH_DEMO_MARKETPLACE_DATA: Record<string, DemoCraftListingTemplate>
       },
     ],
   },
+
+  // 8. Kashmiri Papier-Mâché
+  "kashmiri papier-mache": {
+    craftKey: "kashmiri papier-mache",
+    listings: [
+      {
+        marketplace: "Amazon",
+        title: "Handcrafted Kashmiri Papier-Mâché Floral Trinket Box (15 cm)",
+        price: 2499,
+        currency: "INR",
+        url: "https://www.amazon.in/dp/B07KASH01",
+        availability: "available",
+        material: "Waste paper pulp, Rice glue, 24K gold foil",
+        technique: "Sakhtsazi hand molding & Naqqashi miniature brushwork",
+        size: "15 x 10 x 8 cm",
+        isHandmade: true,
+      },
+      {
+        marketplace: "Flipkart",
+        title: "Srinagar Artisanal Lacquered Papier-Mâché Gold Foil Jewelry Box",
+        price: 2299,
+        currency: "INR",
+        url: "https://www.flipkart.com/item/FLPKASH02",
+        availability: "available",
+        material: "Molded paper pulp, natural lacquer",
+        technique: "Traditional Kashmiri Gul-andar-Gul floral illumination",
+        size: "14 x 9 x 7 cm",
+        isHandmade: true,
+      },
+      {
+        marketplace: "ONDC (JKHandicrafts)",
+        title: "Authentic Kashmir Sakhtsazi Naqashi Papier-Mâché Decorative Box",
+        price: 2650,
+        currency: "INR",
+        url: "https://jkhandicrafts.ondc.org/p/kpm-box-44",
+        availability: "available",
+        material: "Pure paper matrix, stone burnished surface",
+        technique: "Agate burnishing, cat-hair brush miniature painting",
+        size: "16 x 11 x 9 cm",
+        isHandmade: true,
+      },
+      {
+        marketplace: "ONDC (CraftsBazaar)",
+        title: "Traditional Kashmiri Miniature Naqqashi Papier-Mâché Art Piece",
+        price: 2350,
+        currency: "INR",
+        url: "https://craftsbazaar.ondc.org/p/kash-771",
+        availability: "available",
+        material: "Paper composite, vegetal colors, natural gum",
+        technique: "Lacquered Sakhtsazi craft technique",
+        size: "15 x 10 x 8 cm",
+        isHandmade: true,
+      },
+    ],
+  },
 };
 
 export class DemoMarketProvider implements MarketPriceProvider {
   id = "demo_provider";
-  name = "Demo Market Data (Simulation)";
+  name = "Simulated Market Data — SIH Demo Mode";
   isLive = false;
 
   async searchMarketplace(query: ComparisonAttributes): Promise<MarketPriceObservation[]> {
@@ -548,7 +603,7 @@ export class DemoMarketProvider implements MarketPriceProvider {
     const category = (query.category || "").toLowerCase();
     const material = (query.material || "").toLowerCase();
 
-    // Match against the 7 SIH craft scenarios
+    // Match against the 8 SIH craft scenarios
     let matchedTemplate: DemoCraftListingTemplate | undefined;
 
     if (craftQuery.includes("dokra") || craftQuery.includes("dhokra") || productType.includes("nandi") || material.includes("bell metal")) {
@@ -561,13 +616,15 @@ export class DemoMarketProvider implements MarketPriceProvider {
       matchedTemplate = SIH_DEMO_MARKETPLACE_DATA["channapatna toys"];
     } else if (craftQuery.includes("banarasi") || craftQuery.includes("sari") || craftQuery.includes("silk") || craftQuery.includes("katan")) {
       matchedTemplate = SIH_DEMO_MARKETPLACE_DATA["banarasi silk"];
-    } else if (craftQuery.includes("kutch") || craftQuery.includes("embroidery") || craftQuery.includes("mirror")) {
+    } else if (craftQuery.includes("kutch") || craftQuery.includes("embroidery") || craftQuery.includes("mirror") || craftQuery.includes("rogan")) {
       matchedTemplate = SIH_DEMO_MARKETPLACE_DATA["kutch embroidery"];
     } else if (craftQuery.includes("pattachitra") || craftQuery.includes("palm leaf") || craftQuery.includes("raghurajpur")) {
       matchedTemplate = SIH_DEMO_MARKETPLACE_DATA["pattachitra"];
+    } else if (craftQuery.includes("kashmiri") || craftQuery.includes("papier") || craftQuery.includes("naqqashi") || craftQuery.includes("sakhtsazi")) {
+      matchedTemplate = SIH_DEMO_MARKETPLACE_DATA["kashmiri papier-mache"];
     } else {
-      // General fallback to Bastar Dhokra demo data
-      matchedTemplate = SIH_DEMO_MARKETPLACE_DATA["bastar dhokra"];
+      // Do not invent a match or fallback to another craft
+      return [];
     }
 
     const nowIso = new Date().toISOString();
